@@ -2,18 +2,14 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-class BitLinear(nn.Linear):
-    def __init__(
-        self,
-        in_features: int,
-        out_features: int,
-        bias: bool = True,
-        num_bits: int = 8,
-    ):
-        super().__init__(in_features, out_features, bias)
+
+class BitConv2d(nn.Conv2d):
+    def __init__(self, *args, num_bits: int = 8, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.num_bits = num_bits
+
         self.eps:float = 1e-5
         self.quantization_range: int = 2 ** (num_bits - 1) # Q_b in the paper
-        self.norm: nn.Module = nn.LayerNorm(in_features)
 
 
     def ste_weights(self, weights_gamma: float) -> Tensor:
@@ -44,13 +40,31 @@ class BitLinear(nn.Linear):
 
 
     def forward(self, _input: Tensor) -> Tensor:
-        normalized_input: Tensor = self.norm(_input)
+        normalized_input: Tensor = nn.functional.layer_norm(_input, (_input.shape[1:]))
         input_gamma: float = normalized_input.abs().max().item()
         weight_abs_mean: float = self.weight.abs().mean().item()
 
         binarized_weights = self.binarize_weights(weight_abs_mean)
         input_quant = self.quantize_activations(normalized_input, input_gamma)
-        output = torch.nn.functional.linear(input_quant, binarized_weights, self.bias)
+        output = torch.nn.functional.conv2d(
+            input=input_quant,
+            weight=binarized_weights,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            groups=self.groups
+        )
         output = self.dequantize_activations(output, input_gamma, weight_abs_mean)
 
         return output
+
+
+def main():
+    test_tensor = torch.randn(1, 3, 28, 28)
+    layer = BitConv2d(3, 16, 3)
+    out = layer(test_tensor)
+    print(out)
+
+if __name__ == "__main__":
+    main()
