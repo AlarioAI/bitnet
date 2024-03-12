@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from bitnet.bitlinear import BitLinear
-from examples.seed import set_seed
+from seed import set_seed
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
