@@ -1,4 +1,4 @@
-# BitNet
+# BITNET
 ![bitnet](/assets/main_image.png)
 PyTorch implementations for training and evaluating 1.58-bits neural networks. It covers methods and models from the following research papers:
 
@@ -14,14 +14,14 @@ PyTorch implementations for training and evaluating 1.58-bits neural networks. I
 
 ### From source
 ```sh
-git clone git@github.com:AlarioAI/BitNet.git
-cd BitNet
+git clone git@github.com:AlarioAI/bitnet.git
+cd bitnet
 python3.11 -m pip install -e .
 ```
 
 ### Direct (main)
 ```sh
-python3.11 -m pip install https://github.com/AlarioAI/BitNet.git
+python3.11 -m pip install https://github.com/AlarioAI/bitnet.git
 ```
 
 ## Usage:
