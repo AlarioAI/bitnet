@@ -1,6 +1,6 @@
 import torch
 
-from bitnet.bitlinear import BitLinear
+from bitnet.nn.bitlinear import BitLinear
 
 
 def test_bitlinear_initialization():
