@@ -5,7 +5,7 @@ PyTorch implementations for training and evaluating 1.58-bits neural networks. I
 
 ## Papers
 * [BitNet: Scaling 1-bit Transformers for Large Language Models:](https://arxiv.org/pdf/2310.11453.pdf)
-    "The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement just swap out the linears with the BitLinear modules! 
+    "The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement just swap out the linears with the BitLinear modules!
 * [The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits](https://arxiv.org/pdf/2402.17764.pdf)
     **Extends BitNet to 1.58 bits:** Introduces modifications to the original BitNet architecture, including a novel quantization function (absmean) for the weights and a revised approach for handling activation outputs. These changes enable training with 1.58-bit weights while maintaining efficiency and performance.
 
@@ -29,7 +29,7 @@ python3.11 -m pip install https://github.com/AlarioAI/BitNet.git
 ### `BitLinear`
 ```python
 import torch
-from bitnet import BitLinear
+from bitnet.nn.bitlinear import BitLinear
 
 _input = torch.randn(10, 512)
 layer = BitLinear(512, 400)
@@ -42,9 +42,14 @@ print(output)
 ## Examples:
 
 1. **Feedforward** `MNIST`
-Train a one-hidden layer 1.58bits neural network on the MNIST dataset 
+Train a one-hidden layer 1.58bits neural network on the MNIST dataset
 ```sh
 python examples/mnist_ff_example.py
+```
+2. **LeNet5** `MNIST`
+Train the classic LeNet5 with 1.58bits linear and convolutional layers
+```sh
+python examples/mnist_lenet5_example.py
 ```
 
 # License
@@ -60,7 +65,7 @@ Eprint = {arXiv:2310.11453},
 }
 
 @misc{2402.17764,
-Author = {Shuming Ma Hongyu Wang∗ Lingxiao Ma Lei Wang Wenhui Wang Shaohan Huang Li Dong Ruiping Wang Jilong Xue Furu Wei},  
+Author = {Shuming Ma Hongyu Wang Lingxiao Ma Lei Wang Wenhui Wang Shaohan Huang Li Dong Ruiping Wang Jilong Xue Furu Wei},
 Title = {The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits (or Maybe Not Quite)},
 Year = {2024},
 Eprint = {arXiv:2402.17764},
