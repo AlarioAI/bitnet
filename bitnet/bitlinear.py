@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+from torch import Tensor
 
 class BitLinear(nn.Linear):
     def __init__(
@@ -16,20 +16,20 @@ class BitLinear(nn.Linear):
         self.norm: nn.Module = nn.LayerNorm(in_features)
 
 
-    def ste_weights(self, weights_gamma: float) -> torch.Tensor:
+    def ste_weights(self, weights_gamma: float) -> Tensor:
         eps: float = 1e-7
-        scaled_weights:torch.Tensor = self.weight / (weights_gamma + eps)
-        binarized_input_no_grad: torch.Tensor = torch.clamp(torch.round(scaled_weights), min=-1, max=1)
-        binarized_input_with_grad: torch.Tensor = (binarized_input_no_grad - self.weight).detach() + self.weight
-        return binarized_input_with_grad
+        scaled_weights:Tensor = self.weight / (weights_gamma + eps)
+        bin_weights_no_grad: Tensor = torch.clamp(torch.round(scaled_weights), min=-1, max=1)
+        bin_weights_with_grad: Tensor = (bin_weights_no_grad - self.weight).detach() + self.weight
+        return bin_weights_with_grad
 
 
-    def binarize_weights(self, weights_gamma: float) -> torch.Tensor:
+    def binarize_weights(self, weights_gamma: float) -> Tensor:
         binarized_weights = self.ste_weights(weights_gamma)
         return binarized_weights
 
 
-    def quantize_activations(self, _input:torch.Tensor, input_gamma: float) -> torch.Tensor:
+    def quantize_activations(self, _input:Tensor, input_gamma: float) -> Tensor:
         # Equation 4 BitNet paper
         quantized_input = torch.clamp(
                 _input * self.quantization_range / input_gamma,
@@ -39,12 +39,12 @@ class BitLinear(nn.Linear):
         return quantized_input
 
 
-    def dequantize_activations(self, _input: torch.Tensor, input_gamma: float, beta: float) -> torch.Tensor:
+    def dequantize_activations(self, _input: Tensor, input_gamma: float, beta: float) -> Tensor:
         return _input * input_gamma * beta / self.quantization_range
 
 
-    def forward(self, _input: torch.Tensor) -> torch.Tensor:
-        normalized_input: torch.Tensor = self.norm(_input)
+    def forward(self, _input: Tensor) -> Tensor:
+        normalized_input: Tensor = self.norm(_input)
         input_gamma: float = normalized_input.abs().max().item()
         weight_abs_mean: float = self.weight.abs().mean().item()
 
