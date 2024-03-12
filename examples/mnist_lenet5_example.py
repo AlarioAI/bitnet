@@ -1,5 +1,4 @@
 import torch
-from torch import Tensor
 from torch import nn
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
@@ -7,36 +6,12 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from bitnet.nn.bitlinear import BitLinear
+from bitnet.nn.bitconv2d import BitConv2d
+from bitnet.models.lenet5 import LeNet
 from seed import set_seed
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-class Net(nn.Module):
-    def __init__(
-            self,
-            linear_layer: callable,
-            input_size: int,
-            hidden_size: int,
-            num_classes: int
-        ) -> None:
-        super(Net, self).__init__()
-        self.linear_layer = linear_layer
-        self.fc1 = linear_layer(input_size, hidden_size)
-        self.fc2 = linear_layer(hidden_size, num_classes)
-
-
-    @property
-    def __name__(self) -> str:
-        return "BitNet" if self.linear_layer == BitLinear else "FloatNet"
-
-
-    def forward(self, _input: Tensor) -> Tensor:
-        out = _input.flatten(start_dim=1)
-        out = torch.relu(self.fc1(out))
-        out = self.fc2(out)
-        return out
 
 
 def train_model(
@@ -81,8 +56,6 @@ def test_model(model: nn.Module, test_loader: DataLoader):
 
 
 def main():
-    input_size: int         = 784
-    hidden_size: int        = 100
     num_classes: int        = 10
     learning_rate: float    = 1e-3
     num_epochs: int         = 5
@@ -93,8 +66,8 @@ def main():
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    bitnet = Net(BitLinear, input_size, hidden_size, num_classes).to(device)
-    floatnet = Net(nn.Linear, input_size, hidden_size, num_classes).to(device)
+    bitnet = LeNet(BitLinear, BitConv2d, num_classes, 1, 28).to(device)
+    floatnet = LeNet(nn.Linear, nn.Conv2d, num_classes, 1, 28).to(device)
 
     bitnet_optimizer = torch.optim.Adam(bitnet.parameters(), lr=learning_rate)
     floatnet_optimizer = torch.optim.Adam(floatnet.parameters(), lr=learning_rate)
