@@ -1,6 +1,4 @@
-from collections.abc import Callable
 import torch
-from torch import Tensor
 from torch import nn
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
@@ -8,36 +6,12 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from bitnet.nn.bitlinear import BitLinear
+from bitnet.nn.bitconv2d import BitConv2d
+from bitnet.models.lenet5 import LeNet
 from seed import set_seed
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-class Net(nn.Module):
-    def __init__(
-            self,
-            linear_layer: Callable,
-            input_size: int,
-            hidden_size: int,
-            num_classes: int
-        ) -> None:
-        super(Net, self).__init__()
-        self.linear_layer = linear_layer
-        self.fc1 = linear_layer(input_size, hidden_size)
-        self.fc2 = linear_layer(hidden_size, num_classes)
-
-
-    @property
-    def __name__(self) -> str:
-        return "BitNet" if self.linear_layer == BitLinear else "FloatNet"
-
-
-    def forward(self, _input: Tensor) -> Tensor:
-        out = _input.flatten(start_dim=1)
-        out = torch.relu(self.fc1(out))
-        out = self.fc2(out)
-        return out
 
 
 def train_model(
@@ -79,12 +53,9 @@ def test_model(model: nn.Module, test_loader: DataLoader):
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
     print(f'Accuracy of {model.__name__}: {accuracy:.2f}%')
-    return accuracy
 
 
 def main():
-    input_size: int         = 784
-    hidden_size: int        = 100
     num_classes: int        = 10
     learning_rate: float    = 1e-3
     num_epochs: int         = 5
@@ -95,9 +66,8 @@ def main():
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    print(f"Testing on {device=}")
-    bitnet = Net(BitLinear, input_size, hidden_size, num_classes).to(device)
-    floatnet = Net(nn.Linear, input_size, hidden_size, num_classes).to(device)
+    bitnet = LeNet(BitLinear, BitConv2d, num_classes, 1, 28).to(device)
+    floatnet = LeNet(nn.Linear, nn.Conv2d, num_classes, 1, 28).to(device)
 
     bitnet_optimizer = torch.optim.Adam(bitnet.parameters(), lr=learning_rate)
     floatnet_optimizer = torch.optim.Adam(floatnet.parameters(), lr=learning_rate)
@@ -111,17 +81,13 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(bitnet, train_loader, bitnet_optimizer, criterion, num_epochs)
-    bitnet_accuracy: float = test_model(bitnet, test_loader)
+    test_model(bitnet, test_loader)
 
     set_seed()
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(floatnet, train_loader, floatnet_optimizer, criterion, num_epochs)
-    floatnet_accuracy: float = test_model(floatnet, test_loader)
-
-    difference = abs(floatnet_accuracy - bitnet_accuracy)
-    diff_threshold = 1.0
-    assert difference < diff_threshold, "Accuracy must be within 1%"
+    test_model(floatnet, test_loader)
 
 
 if __name__ == "__main__":

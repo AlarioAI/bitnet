@@ -1,6 +1,6 @@
 from torch import nn
 
-from bitnet.bitlinear import BitLinear
+from bitnet.nn.bitlinear import BitLinear
 
 
 def replace_linears_in_hf(
