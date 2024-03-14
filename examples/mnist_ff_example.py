@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import torch
 from torch import Tensor
 from torch import nn
@@ -16,7 +17,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 class Net(nn.Module):
     def __init__(
             self,
-            linear_layer: callable,
+            linear_layer: Callable,
             input_size: int,
             hidden_size: int,
             num_classes: int
@@ -42,7 +43,7 @@ class Net(nn.Module):
 def train_model(
         model: nn.Module,
         train_loader: DataLoader,
-        optimizer: torch.optim,
+        optimizer: torch.optim.Optimizer,
         criterion: nn.CrossEntropyLoss,
         num_epochs: int) -> None:
     for epoch in range(num_epochs):
@@ -78,6 +79,7 @@ def test_model(model: nn.Module, test_loader: DataLoader):
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
     print(f'Accuracy of {model.__name__}: {accuracy:.2f}%')
+    return accuracy
 
 
 def main():
@@ -93,6 +95,7 @@ def main():
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
+    print(f"Testing on {device=}")
     bitnet = Net(BitLinear, input_size, hidden_size, num_classes).to(device)
     floatnet = Net(nn.Linear, input_size, hidden_size, num_classes).to(device)
 
@@ -108,13 +111,17 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(bitnet, train_loader, bitnet_optimizer, criterion, num_epochs)
-    test_model(bitnet, test_loader)
+    bitnet_accuracy: float = test_model(bitnet, test_loader)
 
     set_seed()
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(floatnet, train_loader, floatnet_optimizer, criterion, num_epochs)
-    test_model(floatnet, test_loader)
+    floatnet_accuracy: float = test_model(floatnet, test_loader)
+
+    difference = abs(floatnet_accuracy - bitnet_accuracy)
+    diff_threshold = 1.0
+    assert difference < diff_threshold, "Accuracy must be within 1%"
 
 
 if __name__ == "__main__":

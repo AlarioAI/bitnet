@@ -17,7 +17,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def train_model(
         model: nn.Module,
         train_loader: DataLoader,
-        optimizer: torch.optim,
+        optimizer: torch.optim.Optimizer,
         criterion: nn.CrossEntropyLoss,
         num_epochs: int) -> None:
     for epoch in range(num_epochs):
