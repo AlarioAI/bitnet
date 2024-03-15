@@ -336,11 +336,11 @@ def resnet152(linear_layer, conv_layer, pretrained: bool, **kwargs):
 
 
 def main():
-    bit_resnet18 = resnet18(BitLinear, BitConv2d, pretrained=True, num_classes=100)
-    bit_resnet34 = resnet34(BitLinear, BitConv2d, pretrained=True, num_classes=100)
-    bit_resnet50 = resnet50(BitLinear, BitConv2d, pretrained=True, num_classes=100)
-    bit_resnet101 = resnet101(BitLinear, BitConv2d, pretrained=True, num_classes=100)
-    bit_resnet152 = resnet152(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    _ = resnet18(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    _ = resnet34(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    _ = resnet50(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    _ = resnet101(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    _ = resnet152(BitLinear, BitConv2d, pretrained=True, num_classes=100)
 
 if __name__ == "__main__":
     main()
