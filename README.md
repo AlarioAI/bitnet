@@ -56,6 +56,21 @@ python examples/mnist_lenet5_example.py
 python examples/cifar10_lenet5_example.py
 ```
 
+4. **LeNet5** `Cifar100`
+```sh
+python examples/cifar100_lenet5_example.py
+```
+
+5. **ResNet18** `Cifar100`
+```sh
+python examples/cifar100_resnet18_example.py
+```
+
+6. **ResNet152** `Cifar100`
+```sh
+python examples/cifar100_resnet152_example.py
+```
+
 # License
 MIT
 
