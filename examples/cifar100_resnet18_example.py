@@ -66,8 +66,8 @@ def main():
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
-    bitnet = resnet18(BitLinear, BitConv2d, num_classes=num_classes).to(device)
-    floatnet = resnet18(nn.Linear, nn.Conv2d, num_classes=num_classes).to(device)
+    bitnet = resnet18(BitLinear, BitConv2d, pretrained=True, num_classes=num_classes).to(device)
+    floatnet = resnet18(nn.Linear, nn.Conv2d, pretrained=True, num_classes=num_classes).to(device)
 
     bitnet_optimizer = torch.optim.Adam(bitnet.parameters(), lr=learning_rate)
     floatnet_optimizer = torch.optim.Adam(floatnet.parameters(), lr=learning_rate)

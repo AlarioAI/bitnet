@@ -8,6 +8,15 @@ from bitnet.nn.bitlinear import BitLinear
 from bitnet.nn.bitconv2d import BitConv2d
 
 
+__all__ = [
+    "resnet18",
+    "resnet34",
+    "resnet50",
+    "resnet101",
+    "resnet152",
+]
+
+
 def conv3x3(in_planes: int, conv_layer: nn.Module , out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Module:
     """3x3 convolution with padding"""
     return conv_layer(
@@ -275,30 +284,63 @@ def _resnet(
     conv_layer: Callable,
     block: BasicBlock | Bottleneck,
     layers: list[int],
-    weights: None,#WeightsEnum,
-    progress: bool,
     **kwargs,
 ) -> ResNet:
-    if weights is not None:
-        raise NotImplementedError("Not implemented yet")
-        # _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
 
     model = ResNet(linear_layer, conv_layer, block, layers, **kwargs)
 
-    if weights is not None:
-        raise NotImplementedError("Not implemented yet")
-        # model.load_state_dict(weights.get_state_dict(progress=progress, check_hash=True))
 
     return model
 
 
-def resnet18(linear_layer, conv_layer, **kwargs):
-    return _resnet(linear_layer, conv_layer, BasicBlock, [2, 2, 2, 2], weights=None, progress=False, **kwargs)
+def load_pretrained_weights(model, model_name: str, linear_layer, conv_layer, pretrained: bool, **kwargs):
+    if not pretrained:
+        return model
+
+    pretrained_model = torch.hub.load('pytorch/vision:v0.10.0', model_name, pretrained=True)
+
+    if pretrained_model.fc.out_features != model.fc.out_features:
+        state_dict = pretrained_model.state_dict()
+        state_dict.pop("fc.weight", None)
+        state_dict.pop("fc.bias", None)
+        model.load_state_dict(state_dict, strict=False)
+    else:
+        model.load_state_dict(pretrained_model.state_dict(), strict=False)
+
+    return model
+
+
+def resnet18(linear_layer, conv_layer, pretrained: bool, **kwargs):
+    model = _resnet(linear_layer, conv_layer, BasicBlock, [2, 2, 2, 2], **kwargs)
+    return load_pretrained_weights(model, 'resnet18', linear_layer, conv_layer, pretrained, **kwargs)
+
+
+def resnet34(linear_layer, conv_layer, pretrained: bool, **kwargs):
+    model = _resnet(linear_layer, conv_layer, BasicBlock, [3, 4, 6, 3], **kwargs)
+    return load_pretrained_weights(model, 'resnet34', linear_layer, conv_layer, pretrained, **kwargs)
+
+
+def resnet50(linear_layer, conv_layer, pretrained: bool, **kwargs):
+    model = _resnet(linear_layer, conv_layer, Bottleneck, [3, 4, 6, 3], **kwargs)
+    return load_pretrained_weights(model, 'resnet50', linear_layer, conv_layer, pretrained, **kwargs)
+
+
+def resnet101(linear_layer, conv_layer, pretrained: bool, **kwargs):
+    model = _resnet(linear_layer, conv_layer, Bottleneck, [3, 4, 23, 3], **kwargs)
+    return load_pretrained_weights(model, 'resnet101', linear_layer, conv_layer, pretrained, **kwargs)
+
+
+def resnet152(linear_layer, conv_layer, pretrained: bool, **kwargs):
+    model = _resnet(linear_layer, conv_layer, Bottleneck, [3, 8, 36, 3], **kwargs)
+    return load_pretrained_weights(model, 'resnet152', linear_layer, conv_layer, pretrained, **kwargs)
 
 
 def main():
-    print(resnet18(BitLinear, BitConv2d, num_classes=100))
-
+    bit_resnet18 = resnet18(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    bit_resnet34 = resnet34(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    bit_resnet50 = resnet50(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    bit_resnet101 = resnet101(BitLinear, BitConv2d, pretrained=True, num_classes=100)
+    bit_resnet152 = resnet152(BitLinear, BitConv2d, pretrained=True, num_classes=100)
 
 if __name__ == "__main__":
     main()
