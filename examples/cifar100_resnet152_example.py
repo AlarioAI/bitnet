@@ -66,6 +66,7 @@ def main():
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
+    print(f"Testing on {device=}")
     bitnet = resnet152(BitLinear, BitConv2d, pretrained=True, num_classes=num_classes).to(device)
     floatnet = resnet152(nn.Linear, nn.Conv2d, pretrained=True, num_classes=num_classes).to(device)
 
