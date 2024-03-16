@@ -58,14 +58,3 @@ class BitConv2d(nn.Conv2d):
         output = self.dequantize_activations(output, input_gamma, weight_abs_mean)
 
         return output
-
-
-def main():
-    test_tensor = torch.randn(1, 3, 28, 28)
-    layer = BitConv2d(3, 16, 3)
-    out = layer(test_tensor)
-    print(out)
-
-
-if __name__ == "__main__":
-    main()
