@@ -1,5 +1,11 @@
-from functools import partial
-from typing import Any, Callable, List, Optional
+'''
+A custom version of MobileNetV2 that allows for the use of BitNet layers.
+'''
+
+from typing import Callable, List, Optional, Union, Tuple, Sequence, Any
+from itertools import repeat
+import collections.abc
+import warnings
 
 import torch
 from torch import nn, Tensor
@@ -22,6 +28,21 @@ def _make_divisible(v: float, divisor: int, min_value: Optional[int] = None) -> 
     if new_v < 0.9 * v:
         new_v += divisor
     return new_v
+
+
+def _make_ntuple(x: Any, n: int) -> Tuple[Any, ...]:
+    """
+    Make n-tuple from input x. If x is an iterable, then we just convert it to tuple.
+    Otherwise, we will make a tuple of length n, all with value of x.
+    reference: https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/utils.py#L8
+
+    Args:
+        x (Any): input value
+        n (int): length of the resulting tuple
+    """
+    if isinstance(x, collections.abc.Iterable):
+        return tuple(x)
+    return tuple(repeat(x, n))
 
 
 class ConvNormActivation(torch.nn.Sequential):
@@ -188,10 +209,13 @@ class InvertedResidual(nn.Module):
 #                Conv2dNormActivation(inp, hidden_dim, kernel_size=1, norm_layer=norm_layer, activation_layer=nn.ReLU6)
                 conv_activation(inp, hidden_dim, kernel_size=1, norm_layer=norm_layer, activation_layer=nn.ReLU6)
             )
-        if conv_activation.__class__ == ConvNormActivation:
-            conv_layer = nn.Conv2d
-        else:
+
+        is_bitnet = conv_activation.__class__ == Conv2dBitNormActivation.__class__
+        if is_bitnet:
             conv_layer = BitConv2d
+        else:
+            conv_layer = nn.Conv2d
+
         layers.extend(
             [
                 # dw
@@ -224,7 +248,7 @@ class MobileNetV2(nn.Module):
         self,
         num_classes: int = 1000,
         width_mult: float = 1.0,
-        conv_activation: Callable[..., torch.nn.Module],
+        conv_activation: Callable[..., torch.nn.Module] = Conv2dNormActivation,
         inverted_residual_setting: Optional[List[List[int]]] = None,
         round_nearest: int = 8,
         block: Optional[Callable[..., nn.Module]] = None,
@@ -285,7 +309,7 @@ class MobileNetV2(nn.Module):
             output_channel = _make_divisible(c * width_mult, round_nearest)
             for i in range(n):
                 stride = s if i == 0 else 1
-                features.append(block(input_channel, output_channel, stride, expand_ratio=t, norm_layer=norm_layer))
+                features.append(block(input_channel, output_channel, stride, expand_ratio=t, norm_layer=norm_layer, conv_activation=conv_activation))
                 input_channel = output_channel
         # building last several layers
         features.append(
@@ -297,11 +321,11 @@ class MobileNetV2(nn.Module):
         self.features = nn.Sequential(*features)
 
         # building classifier
-
-        if conv_activation.__class__ == ConvNormActivation:
-            linear_layer = nn.Linear
-        else:
+        self.is_bitnet = conv_activation.__class__ == Conv2dBitNormActivation.__class__
+        if self.is_bitnet:
             linear_layer = BitLinear
+        else:
+            linear_layer = nn.Linear
 
         self.classifier = nn.Sequential(
             nn.Dropout(p=dropout),
@@ -334,5 +358,16 @@ class MobileNetV2(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
 
+    @property
+    def name(self) -> str:
+        if self.is_bitnet:
+            return "BitNet"
+        return "FloatNet"
 
-def create_mobilnet2(
+
+def create_bit_mobilenet2(num_classes=100):
+    return MobileNetV2(num_classes=num_classes, conv_activation=Conv2dBitNormActivation)
+
+
+def create_mobilenet2(num_classes=100):
+    return MobileNetV2(num_classes=num_classes, conv_activation=Conv2dNormActivation)
