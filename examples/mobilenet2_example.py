@@ -35,7 +35,7 @@ def train_model(
 
             running_loss += loss.item()
             pbar.set_description(
-                f'Model: {model.__name__} - Epoch [{epoch+1}], Loss: {running_loss / (i+1):.4f}'
+                f'Model: {model.name} - Epoch [{epoch+1}], Loss: {running_loss / (i+1):.4f}'
             )
             pbar.update(1)
         pbar.close()
@@ -53,7 +53,7 @@ def test_model(model: nn.Module, test_loader: DataLoader):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
     accuracy = 100 * correct / total
-    print(f'Accuracy of {model.__name__}: {accuracy:.2f}%')
+    print(f'Accuracy of {model.name}: {accuracy:.2f}%')
 
 
 def main():
