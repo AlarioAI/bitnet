@@ -51,6 +51,25 @@ Train the classic LeNet5 with 1.58bits linear and convolutional layers
 ```sh
 python examples/mnist_lenet5_example.py
 ```
+3. **LeNet5** `Cifar10`
+```sh
+python examples/cifar10_lenet5_example.py
+```
+
+4. **LeNet5** `Cifar100`
+```sh
+python examples/cifar100_lenet5_example.py
+```
+
+5. **ResNet18** `Cifar100`
+```sh
+python examples/cifar100_resnet18_example.py
+```
+
+6. **ResNet152** `Cifar100`
+```sh
+python examples/cifar100_resnet152_example.py
+```
 
 # License
 MIT

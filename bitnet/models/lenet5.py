@@ -1,5 +1,6 @@
 import torch.nn as nn
 from torch import Tensor
+
 from bitnet.nn.bitlinear import BitLinear
 from bitnet.nn.bitconv2d import BitConv2d
 
