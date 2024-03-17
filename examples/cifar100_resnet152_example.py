@@ -56,6 +56,9 @@ def test_model(model: nn.Module, test_loader: DataLoader):
 
 
 def main():
+
+    set_seed()
+
     num_classes: int        = 100
     learning_rate: float    = 1e-3
     num_epochs: int         = 10
