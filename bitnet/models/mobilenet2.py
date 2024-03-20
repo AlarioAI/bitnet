@@ -9,6 +9,8 @@ import warnings
 
 import torch
 from torch import nn, Tensor
+from torch.hub import load_state_dict_from_url
+from torchvision.models import MobileNet_V2_Weights
 
 from bitnet.nn.bitconv2d import BitConv2d
 from bitnet.nn.bitlinear import BitLinear
@@ -210,7 +212,7 @@ class InvertedResidual(nn.Module):
                 conv_activation(inp, hidden_dim, kernel_size=1, norm_layer=norm_layer, activation_layer=nn.ReLU6)
             )
 
-        is_bitnet = conv_activation.__class__ == Conv2dBitNormActivation.__class__
+        is_bitnet = conv_activation == Conv2dBitNormActivation
         if is_bitnet:
             conv_layer = BitConv2d
         else:
@@ -321,7 +323,7 @@ class MobileNetV2(nn.Module):
         self.features = nn.Sequential(*features)
 
         # building classifier
-        self.is_bitnet = conv_activation.__class__ == Conv2dBitNormActivation.__class__
+        self.is_bitnet = conv_activation == Conv2dBitNormActivation
         if self.is_bitnet:
             linear_layer = BitLinear
         else:
@@ -365,9 +367,34 @@ class MobileNetV2(nn.Module):
         return "FloatNet"
 
 
-def create_bit_mobilenet2(num_classes=100):
-    return MobileNetV2(num_classes=num_classes, conv_activation=Conv2dBitNormActivation)
+def load_pretrained_weights(model: MobileNetV2, load_fc: bool = True) -> None:
+    """
+    Load pretrianed weights from torchvision model zoo.
+
+    Args:
+        model (MobileNetV2): The model to load the weights to
+        model_name (str): The name of the model to load
+        load_fc (bool): Whether to load the fully connected layer. Default: True
+    """
+    if load_fc:
+        model.load_state_dict(load_state_dict_from_url(MobileNet_V2_Weights.IMAGENET1K_V2.url))
+    else:
+        state_dict = load_state_dict_from_url(MobileNet_V2_Weights.IMAGENET1K_V2.url)
+        state_dict = {k: v for k, v in state_dict.items() if "classifier" not in k}
+        model.load_state_dict(state_dict, strict=False)
 
 
-def create_mobilenet2(num_classes=100):
-    return MobileNetV2(num_classes=num_classes, conv_activation=Conv2dNormActivation)
+def bit_mobilenet_v2(num_classes=100, pretrained=False, **kwargs):
+    model = MobileNetV2(num_classes=num_classes, conv_activation=Conv2dBitNormActivation, **kwargs)
+    if pretrained:
+        load_pretrained_weights(model, load_fc=num_classes == 1000)
+
+    return model
+
+
+def mobilenet_v2(num_classes=100, pretrained=False, **kwargs):
+    model = MobileNetV2(num_classes=num_classes, conv_activation=Conv2dNormActivation, **kwargs)
+    if pretrained:
+        load_pretrained_weights(model, load_fc=num_classes == 1000)
+
+    return model

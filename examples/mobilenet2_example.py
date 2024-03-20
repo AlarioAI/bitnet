@@ -5,10 +5,7 @@ from torch.utils.data import DataLoader
 
 from tqdm import tqdm
 
-from bitnet.nn.bitlinear import BitLinear
-from bitnet.nn.bitconv2d import BitConv2d
-from bitnet.models.resnet import resnet18
-from bitnet.models.mobilenet2 import create_mobilenet2, create_bit_mobilenet2
+from bitnet.models.mobilenet2 import mobilenet_v2, bit_mobilenet_v2
 from seed import set_seed
 
 
@@ -63,13 +60,12 @@ def main():
     batch_size: int         = 128
 
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.5071, 0.4865, 0.4409], [0.2623, 0.2513, 0.2714])
     ])
 
-    bitnet =  create_bit_mobilenet2(num_classes=num_classes).to(device)
-    floatnet = create_mobilenet2(num_classes).to(device)
+    bitnet =  bit_mobilenet_v2(num_classes=num_classes, pretrained=True).to(device)
+    floatnet = mobilenet_v2(num_classes, pretrained=True).to(device)
 
     bitnet_optimizer = torch.optim.Adam(bitnet.parameters(), lr=learning_rate)
     floatnet_optimizer = torch.optim.Adam(floatnet.parameters(), lr=learning_rate)
@@ -83,7 +79,7 @@ def main():
     set_seed()
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    train_model(bitnet, train_loader, bitnet_optimizer, criterion, num_epochs)
+    train_model(bitnet, train_loader, bitnet_optimizer, criterion, num_epochs * 2)
     test_model(bitnet, test_loader)
 
     print("Training FloatNet")
