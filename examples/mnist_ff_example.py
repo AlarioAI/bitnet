@@ -83,6 +83,9 @@ def test_model(model: nn.Module, test_loader: DataLoader):
 
 
 def main():
+
+    set_seed()
+
     input_size: int         = 784
     hidden_size: int        = 100
     num_classes: int        = 10

@@ -56,6 +56,9 @@ def test_model(model: nn.Module, test_loader: DataLoader):
 
 
 def main():
+
+    set_seed()
+
     num_classes: int        = 10
     learning_rate: float    = 1e-3
     num_epochs: int         = 10
@@ -66,6 +69,7 @@ def main():
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
+    print(f"Testing on {device=}")
     bitnet = LeNet(BitLinear, BitConv2d, num_classes, 3, 32).to(device)
     floatnet = LeNet(nn.Linear, nn.Conv2d, num_classes, 3, 32).to(device)
 
