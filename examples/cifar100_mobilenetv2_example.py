@@ -9,7 +9,7 @@ from bitnet.models.mobilenet2 import mobilenet_v2, bit_mobilenet_v2
 from seed import set_seed
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 
 
 def train_model(
