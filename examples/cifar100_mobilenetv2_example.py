@@ -54,6 +54,9 @@ def test_model(model: nn.Module, test_loader: DataLoader):
 
 
 def main():
+
+    set_seed()
+
     num_classes: int        = 100
     learning_rate: float    = 1e-3
     num_epochs: int         = 10
@@ -64,6 +67,7 @@ def main():
         transforms.Normalize([0.5071, 0.4865, 0.4409], [0.2623, 0.2513, 0.2714])
     ])
 
+    print(f"Testing on {device=}")
     bitnet =  bit_mobilenet_v2(num_classes=num_classes, pretrained=True).to(device)
     floatnet = mobilenet_v2(num_classes, pretrained=True).to(device)
 
@@ -75,14 +79,12 @@ def main():
     train_dataset = datasets.CIFAR100('./cifar_data', train=True, download=True, transform=transform)
     test_dataset = datasets.CIFAR100('./cifar_data', train=False, download=True, transform=transform)
 
-    print("Training BitNet")
     set_seed()
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(bitnet, train_loader, bitnet_optimizer, criterion, num_epochs)
     test_model(bitnet, test_loader)
 
-    print("Training FloatNet")
     set_seed()
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
