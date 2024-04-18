@@ -1,0 +1,52 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage[final]{main}    % Use the final version of the NeurIPS style
+
+\title{Convolutional Neural Networks in 1.58 Bits}
+
+\author{%
+  Dario Cazzani \\
+  Collaboration AI Team \\
+  Cisco Systems \\
+  \texttt{dariocazzani@gmail.com} \\
+  \texttt{dcazzani@cisco.com} \\
+  \And
+  Aleksandr Yeganov \\
+  Collaboration AI Team \\
+  Cisco Systems \\
+  \texttt{ayeganov@gmail.com} \\
+  \texttt{ayeganov@cisco.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  The evolution of large language models (LLMs) has reached a pivotal point with the advent of 1-bit architectures, notably demonstrated by recent works such as BitNet \cite{wang2023bitnet} and the conceptual advancement in "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era}. These foundational studies have set the stage for significant reductions in energy consumption and memory usage without sacrificing performance. Building upon these groundbreaking concepts, our work introduces an innovative extension by adapting the 1.58-bit quantization technique to convolutional layers, an expansion beyond the original linear layer implementations. This extension is meticulously evaluated across widely-utilized convolutional architectures such as MobileNet and ResNet, and tested on standard datasets including CIFAR-10/100, MNIST, and CelebA. Our findings reveal nuanced insights into the behavior of these architectures under the 1.58-bit regime, highlighting performance retention and efficiency gains across varied tasks. Furthermore, in an effort to foster reproducibility and facilitate further research, we accompany our paper with open-source code. This codebase not only enables the replication of our experimental results but also allows users to automatically generate the relevant graphs and performance metrics, thereby advancing the collective understanding and application of 1.58-bit technology in modern neural networks.
+\end{abstract}
+
+
+\section{Introduction}
+
+The ever-increasing computational demands of large language models (LLMs) necessitate innovations in model architecture that can reduce energy and memory requirements without compromising performance. Recent advancements in 1-bit architectures have shown promising results in addressing these challenges. Pioneering studies like the BitNet \cite{wang2023bitnet} and subsequent developments such as those described in "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} have introduced scalable and efficient solutions that maintain competitive performance metrics.
+
+Building on this foundational work, our research extends the 1.58-bit quantization approach, previously applied only to linear layers, to convolutional layers. This extension aims to explore and understand how standard convolutional architectures—such as MobileNet and ResNet—perform when adapted to this reduced bit-width paradigm. By conducting comprehensive experiments across various datasets including CIFAR-10/100, MNIST, and CelebA, we provide a detailed analysis of the impact of 1.58-bit quantization on these models.
+
+In addition to empirical evaluations, this paper contributes to the field by releasing open-source code, enabling both replication of our results and further experimentation by the community. This not only underscores our commitment to transparency but also facilitates a deeper engagement with the technology, allowing for continuous improvements and adaptations.
+
+This introduction outlines the structure of the paper, which details our methodology, results, and insights into the application of 1.58-bit technology in convolutional neural networks, potentially setting a new standard for efficiency in the field.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
