@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from torch import Tensor
+from torch.autograd import Function
+
 
 
 class BitConv2d(nn.Conv2d):
@@ -56,5 +58,28 @@ class BitConv2d(nn.Conv2d):
             groups=self.groups
         )
         output = self.dequantize_activations(output, input_gamma, weight_abs_mean)
+
+        return output
+
+
+class BinaryConv2D(Function):
+    @staticmethod
+    def forward(ctx, input, weight, bias=None):
+        batch_size, input_channels, input_height, input_width = input.shape
+        _, weight_channels, kernel_height, kernel_width = weight.shape
+
+        output = torch.zeros((batch_size, weight_channels, input_height, input_width), device=input.device)
+
+        for oc in range(weight_channels):
+            binary_weights = weight[:, oc, :, :]
+
+            mask = binary_weights.bool()
+
+            selected_inputs = input[:, mask, :, :]
+
+            output[:, oc, :, :] = selected_inputs.sum(dim=1)
+
+        if bias is not None:
+            output += bias
 
         return output

@@ -286,3 +286,5 @@
 
 
 # # Add more tests based on the scenarios and edge cases you want to cover.
+
+from bitnet.nn.bitconv2d import BinaryConv2D
