@@ -361,7 +361,7 @@ class MobileNetV2(nn.Module):
         return self._forward_impl(x)
 
     @property
-    def name(self) -> str:
+    def __name__(self) -> str:
         if self.is_bitnet:
             return "BitNet"
         return "FloatNet"
