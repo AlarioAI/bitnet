@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from tqdm import tqdm
 
-from bitnet.models.mobilenet2 import mobilenet_v2, bit_mobilenet_v2
+from bitnet.models.mobilenet_v2 import mobilenet_v2, bit_mobilenet_v2
 from bitnet.metrics import Metrics
 from bitnet.seed import set_seed
 
