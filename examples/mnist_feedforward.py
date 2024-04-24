@@ -83,7 +83,7 @@ def test_model(model: nn.Module, test_loader: DataLoader) -> tuple[dict[str, flo
     return {model.__name__: metric}, metrics_used
 
 
-def run(seed: int | None) -> tuple[dict[str, float], Metrics]:
+def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
 
     set_seed(seed)
     return_value: dict[str, float] = {}
@@ -103,6 +103,9 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics]:
     print(f"Testing on {device=}")
     bitnet = Net(BitLinear, input_size, hidden_size, num_classes).to(device)
     floatnet = Net(nn.Linear, input_size, hidden_size, num_classes).to(device)
+    num_params_bitnet: int = sum(p.numel() for p in bitnet.parameters() if p.requires_grad)
+    num_params_floatnet: int = sum(p.numel() for p in floatnet.parameters() if p.requires_grad)
+    assert num_params_bitnet == num_params_floatnet
 
     bitnet_optimizer = torch.optim.Adam(bitnet.parameters(), lr=learning_rate)
     floatnet_optimizer = torch.optim.Adam(floatnet.parameters(), lr=learning_rate)
@@ -126,7 +129,7 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics]:
     results, metrics_used = test_model(floatnet, test_loader)
     return_value.update(results)
 
-    return return_value, metrics_used
+    return return_value, metrics_used, num_params_bitnet
 
 
 if __name__ == "__main__":

@@ -11,10 +11,10 @@ def run_experiment(module_name: str) -> dict:
     return_dict: dict = {}
     for seed in range(ExperimentConfig.NUM_RUNS):
         print(f"Running experiments: `{module_name}` with seed {seed}")
-        result_dict, metric = module.run(seed)
+        result_dict, metric, num_parameters = module.run(seed)
         for key, value in result_dict.items():
             if key not in cur_experiment_results:
-                cur_experiment_results[key] = {"scores": [], "metric": str(metric)}
+                cur_experiment_results[key] = {"scores": [], "metric": str(metric), "num_parameters": num_parameters}
             cur_experiment_results[key]["scores"].append(value)
     model_name: str = module_name.split(".")[-1]
     return_dict[model_name] = cur_experiment_results

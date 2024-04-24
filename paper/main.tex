@@ -13,6 +13,9 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{makecell}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
 \usepackage[final]{main}    % Use the final version of the NeurIPS style
 
 \title{Convolutional Neural Networks in 1.58 Bits}
@@ -97,22 +100,33 @@ In the ensuing tables, we present a comparative analysis of performance metrics 
 \Xhline{2\arrayrulewidth}
 \textbf{Architecture} & \textbf{Dataset} & \textbf{Type} & \textbf{Mean Accuracy (\%)} & \textbf{Std Dev (\%)} \\
 \Xhline{2\arrayrulewidth}
-resnet18 & cifar100 & BitNet & 44.95 & 0.66 \\
-resnet18 & cifar100 & FloatNet & \textbf{50.57} & 0.78 \\
-\Xhline{2\arrayrulewidth}
-resnet152 & cifar100 & BitNet & 38.66 & 1.68 \\
-resnet152 & cifar100 & FloatNet & \textbf{49.61} & 1.71 \\
-\Xhline{2\arrayrulewidth}
-lenet5 & cifar100 & BitNet & 26.70 & 0.12 \\
-lenet5 & cifar100 & FloatNet & \textbf{32.15} & 0.34 \\
-\Xhline{2\arrayrulewidth}
 feedforward & mnist & BitNet & 96.31 & 0.03 \\
 feedforward & mnist & FloatNet & \textbf{96.53} & 0.09 \\
+\Xhline{2\arrayrulewidth}
+lenet5 & mnist & BitNet & 98.88 & 0.09 \\
+lenet5 & mnist & FloatNet & \textbf{98.99} & 0.06 \\
 \Xhline{2\arrayrulewidth}
 \end{tabular}
 \caption{Experimental Results Comparing BitNet and FloatNet across various architectures and datasets.}
 \label{tab:results}
 \end{table}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+xlabel={Number of Parameters},
+ylabel={Accuracy Discrepancy},
+]
+\addplot[only marks] coordinates {
+(79510, 0.22499999999999432) (61728, 0.11000000000001364) 
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}
+\label{fig:discrepancy_plot}
+\end{figure}
+
 % END_TABLE
 
 \subsection{Discussion}

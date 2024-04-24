@@ -5,7 +5,7 @@ import re
 from bitnet.config import ProjectConfig
 
 
-def generate_latex_table(results):
+def generate_latex_table_and_graph(results):
     header = "\\begin{table}[h]\n" \
              "\\centering\n" \
              "\\begin{tabular}{|c|c|c|c|c|}\n" \
@@ -15,18 +15,24 @@ def generate_latex_table(results):
     footer = "\\end{tabular}\n" \
              "\\caption{Experimental Results Comparing BitNet and FloatNet across various architectures and datasets.}\n" \
              "\\label{tab:results}\n" \
-             "\\end{table}"
+             "\\end{table}\n\n"
 
     body = ""
+    plot_data = ""
     for experiment, models in results.items():
         dataset, architecture = experiment.split('_')
-        # Assuming you have two types of models BitNet and FloatNet for each architecture
-        bitnet_score = models.get('BitNet', {}).get('scores', [0])
-        floatnet_score = models.get('FloatNet', {}).get('scores', [0])
-        mean_bitnet = np.mean(bitnet_score)
-        mean_floatnet = np.mean(floatnet_score)
-        std_bitnet = np.std(bitnet_score)
-        std_floatnet = np.std(floatnet_score)
+        bitnet_data = models.get('BitNet', {})
+        floatnet_data = models.get('FloatNet', {})
+        mean_bitnet = np.mean(bitnet_data.get('scores', [0]))
+        mean_floatnet = np.mean(floatnet_data.get('scores', [0]))
+        std_bitnet = np.std(bitnet_data.get('scores', [0]))
+        std_floatnet = np.std(floatnet_data.get('scores', [0]))
+        num_params = bitnet_data.get('num_parameters', 0)
+
+        discrepancy = abs(mean_bitnet - mean_floatnet)
+
+        # Data for the scatter plot
+        plot_data += f"({num_params}, {discrepancy}) "
 
         # Compare scores and bold the best
         mean_accuracy_bitnet = f"\\textbf{{{mean_bitnet:.2f}}}" if mean_bitnet > mean_floatnet else f"{mean_bitnet:.2f}"
@@ -36,7 +42,25 @@ def generate_latex_table(results):
         body += f"{architecture} & {dataset} & FloatNet & {mean_accuracy_floatnet} & {std_floatnet:.2f} \\\\\n"
         body += "\\Xhline{2\\arrayrulewidth}\n"
 
-    return f"{header}{body}{footer}"
+    # Add the scatter plot to the footer
+    graph_footer = "\\begin{figure}[h]\n" \
+                   "\\centering\n" \
+                   "\\begin{tikzpicture}\n" \
+                   "\\begin{axis}[\n" \
+                   "xlabel={Number of Parameters},\n" \
+                   "ylabel={Accuracy Discrepancy},\n" \
+                   "]\n" \
+                   "\\addplot[only marks] coordinates {\n" \
+                   f"{plot_data}\n" \
+                   "};\n" \
+                   "\\end{axis}\n" \
+                   "\\end{tikzpicture}\n" \
+                   "\\caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}\n" \
+                   "\\label{fig:discrepancy_plot}\n" \
+                   "\\end{figure}\n"
+
+    return f"{header}{body}{footer}{graph_footer}"
+
 
 
 
@@ -62,7 +86,7 @@ def main():
     with open(results_file, 'r') as f:
         results = json.load(f)
 
-    table_data = generate_latex_table(results)
+    table_data = generate_latex_table_and_graph(results)
     insert_table_into_document(latex_document_path, table_data)
 
 
