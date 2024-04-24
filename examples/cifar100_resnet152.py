@@ -7,8 +7,9 @@ from tqdm import tqdm
 
 from bitnet.nn.bitlinear import BitLinear
 from bitnet.nn.bitconv2d import BitConv2d
-from bitnet.models.lenet5 import LeNet
-from seed import set_seed
+from bitnet.models.resnet import resnet152
+from bitnet.metrics import Metrics
+from bitnet.seed import set_seed
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -40,7 +41,8 @@ def train_model(
         pbar.close()
 
 
-def test_model(model: nn.Module, test_loader: DataLoader):
+def test_model(model: nn.Module, test_loader: DataLoader) -> tuple[dict[str, float], Metrics]:
+    metrics_used: Metrics = Metrics.ACCURACY
     model.eval()
     correct: int = 0
     total: int = 0
@@ -51,13 +53,14 @@ def test_model(model: nn.Module, test_loader: DataLoader):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    accuracy = 100 * correct / total
-    print(f'Accuracy of {model.__name__}: {accuracy:.2f}%')
+    metric: float = 100 * correct / total
+    return {model.__name__: metric}, metrics_used
 
 
-def main():
+def run(seed: int | None) -> tuple[dict[str, float], Metrics]:
 
-    set_seed()
+    set_seed(seed)
+    return_value: dict[str, float] = {}
 
     num_classes: int        = 100
     learning_rate: float    = 1e-3
@@ -70,8 +73,8 @@ def main():
     ])
 
     print(f"Testing on {device=}")
-    bitnet = LeNet(BitLinear, BitConv2d, num_classes, 3, 32).to(device)
-    floatnet = LeNet(nn.Linear, nn.Conv2d, num_classes, 3, 32).to(device)
+    bitnet = resnet152(BitLinear, BitConv2d, pretrained=True, num_classes=num_classes).to(device)
+    floatnet = resnet152(nn.Linear, nn.Conv2d, pretrained=True, num_classes=num_classes).to(device)
 
     bitnet_optimizer = torch.optim.Adam(bitnet.parameters(), lr=learning_rate)
     floatnet_optimizer = torch.optim.Adam(floatnet.parameters(), lr=learning_rate)
@@ -81,18 +84,24 @@ def main():
     train_dataset = datasets.CIFAR100('./cifar_data', train=True, download=True, transform=transform)
     test_dataset = datasets.CIFAR100('./cifar_data', train=False, download=True, transform=transform)
 
-    set_seed()
+    set_seed(seed)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(bitnet, train_loader, bitnet_optimizer, criterion, num_epochs)
     test_model(bitnet, test_loader)
+    results, metrics_used = test_model(bitnet, test_loader)
+    return_value.update(results)
 
-    set_seed()
+    set_seed(seed)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     train_model(floatnet, train_loader, floatnet_optimizer, criterion, num_epochs)
     test_model(floatnet, test_loader)
+    results, metrics_used = test_model(floatnet, test_loader)
+    return_value.update(results)
+
+    return return_value, metrics_used
 
 
 if __name__ == "__main__":
-    main()
+    print(run(None))
