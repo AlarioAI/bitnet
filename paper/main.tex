@@ -100,11 +100,17 @@ In the ensuing tables, we present a comparative analysis of performance metrics 
 \Xhline{2\arrayrulewidth}
 \textbf{Architecture} & \textbf{Dataset} & \textbf{Type} & \textbf{Mean Accuracy (\%)} & \textbf{Std Dev (\%)} \\
 \Xhline{2\arrayrulewidth}
+resnet18 & cifar100 & BitNet & 44.95 & 0.66 \\
+resnet18 & cifar100 & FloatNet & \textbf{50.57} & 0.78 \\
+\Xhline{2\arrayrulewidth}
+resnet152 & cifar100 & BitNet & 38.10 & 0.08 \\
+resnet152 & cifar100 & FloatNet & \textbf{49.73} & 0.75 \\
+\Xhline{2\arrayrulewidth}
+lenet5 & cifar100 & BitNet & 26.70 & 0.12 \\
+lenet5 & cifar100 & FloatNet & \textbf{32.15} & 0.34 \\
+\Xhline{2\arrayrulewidth}
 feedforward & mnist & BitNet & 96.31 & 0.03 \\
 feedforward & mnist & FloatNet & \textbf{96.53} & 0.09 \\
-\Xhline{2\arrayrulewidth}
-lenet5 & mnist & BitNet & 98.88 & 0.09 \\
-lenet5 & mnist & FloatNet & \textbf{98.99} & 0.06 \\
 \Xhline{2\arrayrulewidth}
 \end{tabular}
 \caption{Experimental Results Comparing BitNet and FloatNet across various architectures and datasets.}
@@ -117,10 +123,26 @@ lenet5 & mnist & FloatNet & \textbf{98.99} & 0.06 \\
 \begin{axis}[
 xlabel={Number of Parameters},
 ylabel={Accuracy Discrepancy},
+legend style={at={(0.5,-0.15)},anchor=north,legend columns=-1},
+xmode=log,
+log basis x={10},
 ]
-\addplot[only marks] coordinates {
-(79510, 0.22499999999999432) (61728, 0.11000000000001364) 
+\addplot[only marks, mark=*, color=blue] coordinates {
+(79510,0.22499999999999432)
 };
+\addlegendentry{feedforward}
+\addplot[only marks, mark=*, color=red] coordinates {
+(90798,5.445)
+};
+\addlegendentry{lenet5}
+\addplot[only marks, mark=*, color=green] coordinates {
+(58348708,11.629999999999995)
+};
+\addlegendentry{resnet152}
+\addplot[only marks, mark=*, color=brown] coordinates {
+(11227812,5.619999999999997)
+};
+\addlegendentry{resnet18}
 \end{axis}
 \end{tikzpicture}
 \caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}

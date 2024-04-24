@@ -20,7 +20,7 @@ def train_model(
         criterion: nn.CrossEntropyLoss,
         num_epochs: int) -> None:
     for epoch in range(num_epochs):
-        pbar = tqdm(total=len(train_loader), desc=f"Training {model.name}")
+        pbar = tqdm(total=len(train_loader), desc=f"Training {model.__name__}")
         running_loss: float = 0.0
         for i, (images, labels) in enumerate(train_loader):
             images, labels = images.to(device), labels.to(device)
@@ -33,7 +33,7 @@ def train_model(
 
             running_loss += loss.item()
             pbar.set_description(
-                f'Model: {model.name} - Epoch [{epoch+1}], Loss: {running_loss / (i+1):.4f}'
+                f'Model: {model.__name__} - Epoch [{epoch+1}], Loss: {running_loss / (i+1):.4f}'
             )
             pbar.update(1)
         pbar.close()

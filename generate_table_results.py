@@ -5,6 +5,8 @@ import re
 from bitnet.config import ProjectConfig
 
 
+import numpy as np
+
 def generate_latex_table_and_graph(results):
     header = "\\begin{table}[h]\n" \
              "\\centering\n" \
@@ -18,9 +20,15 @@ def generate_latex_table_and_graph(results):
              "\\end{table}\n\n"
 
     body = ""
-    plot_data = ""
+    architectures = set()
+    plot_data = {}
+
     for experiment, models in results.items():
         dataset, architecture = experiment.split('_')
+        architectures.add(architecture)
+        if architecture not in plot_data:
+            plot_data[architecture] = []
+
         bitnet_data = models.get('BitNet', {})
         floatnet_data = models.get('FloatNet', {})
         mean_bitnet = np.mean(bitnet_data.get('scores', [0]))
@@ -31,8 +39,8 @@ def generate_latex_table_and_graph(results):
 
         discrepancy = abs(mean_bitnet - mean_floatnet)
 
-        # Data for the scatter plot
-        plot_data += f"({num_params}, {discrepancy}) "
+        # Append data for the scatter plot
+        plot_data[architecture].append((num_params, discrepancy))
 
         # Compare scores and bold the best
         mean_accuracy_bitnet = f"\\textbf{{{mean_bitnet:.2f}}}" if mean_bitnet > mean_floatnet else f"{mean_bitnet:.2f}"
@@ -42,26 +50,38 @@ def generate_latex_table_and_graph(results):
         body += f"{architecture} & {dataset} & FloatNet & {mean_accuracy_floatnet} & {std_floatnet:.2f} \\\\\n"
         body += "\\Xhline{2\\arrayrulewidth}\n"
 
-    # Add the scatter plot to the footer
+    all_params = [data.get('num_parameters', 0) for models in results.values() for data in models.values()]
+    use_log_scale = max(all_params) / min(all_params) > 100
+
+    # Prepare the scatter plot data with different colors
+    colors = ['blue', 'red', 'green', 'brown', 'cyan', 'magenta', 'orange', 'black', 'purple', 'yellow']
+    color_map = {arch: color for arch, color in zip(sorted(architectures), colors)}
+
     graph_footer = "\\begin{figure}[h]\n" \
                    "\\centering\n" \
                    "\\begin{tikzpicture}\n" \
                    "\\begin{axis}[\n" \
                    "xlabel={Number of Parameters},\n" \
                    "ylabel={Accuracy Discrepancy},\n" \
-                   "]\n" \
-                   "\\addplot[only marks] coordinates {\n" \
-                   f"{plot_data}\n" \
-                   "};\n" \
-                   "\\end{axis}\n" \
-                   "\\end{tikzpicture}\n" \
-                   "\\caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}\n" \
-                   "\\label{fig:discrepancy_plot}\n" \
-                   "\\end{figure}\n"
+                   "legend style={at={(0.5,-0.15)},anchor=north,legend columns=-1},\n"
+
+    if use_log_scale:
+        graph_footer += "xmode=log,\nlog basis x={10},\n"
+
+    graph_footer += "]\n"
+    for arch, color in color_map.items():
+        graph_footer += f"\\addplot[only marks, mark=*, color={color}] coordinates {{\n"
+        for params, discrepancy in plot_data[arch]:
+            graph_footer += f"({params},{discrepancy})\n"
+        graph_footer += f"}};\n\\addlegendentry{{{arch}}}\n"
+
+    graph_footer += "\\end{axis}\n" \
+                    "\\end{tikzpicture}\n" \
+                    "\\caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}\n" \
+                    "\\label{fig:discrepancy_plot}\n" \
+                    "\\end{figure}\n"
 
     return f"{header}{body}{footer}{graph_footer}"
-
-
 
 
 

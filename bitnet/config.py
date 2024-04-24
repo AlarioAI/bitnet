@@ -9,5 +9,5 @@ class ProjectConfig:
 
 
 class ExperimentConfig:
-    NUM_RUNS = 2
+    NUM_RUNS = 10
     SEED = 53
