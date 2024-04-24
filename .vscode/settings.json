@@ -1,4 +1,4 @@
 {
     "files.trimTrailingWhitespace": true,
-    "editor.rulers": [99]
+    "editor.rulers": [120]
 }
