@@ -3,11 +3,14 @@ import json
 from glob import glob
 
 
-def run_experiment(module_name: str, num_runs: int = 2) -> dict:
+from bitnet.config import ProjectConfig, ExperimentConfig
+
+
+def run_experiment(module_name: str) -> dict:
     module = importlib.import_module(module_name)
     cur_experiment_results: dict = {}
     return_dict: dict = {}
-    for seed in range(num_runs):
+    for seed in range(ExperimentConfig.NUM_RUNS):
         print(f"Running experiments: `{module_name}` with seed {seed}")
         result_dict, metric = module.run(seed)
         for key, value in result_dict.items():
@@ -21,12 +24,12 @@ def run_experiment(module_name: str, num_runs: int = 2) -> dict:
 
 def main():
     results: dict = {}
-    experiments: list[str] = glob("examples/*py")
+    experiments: list[str] = glob(f"{ProjectConfig.EXAMPLES_DIR}/*py")
     experiments = [exp.replace("/", ".").replace(".py", "") for exp in experiments]
     for exp in experiments:
         results.update(run_experiment(exp))
 
-        with open('experiment_results.json', 'w') as f:
+        with open(f"{ProjectConfig.RESULTS_FILE}", 'w') as f:
             json.dump(results, f, indent=4)
 
 
