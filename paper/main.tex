@@ -9,6 +9,9 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{xcolor}         % colors
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
 \usepackage[final]{main}    % Use the final version of the NeurIPS style
 
 \title{Convolutional Neural Networks in 1.58 Bits}
@@ -32,19 +35,48 @@
 \maketitle
 
 \begin{abstract}
-  The evolution of large language models (LLMs) has reached a pivotal point with the advent of 1-bit architectures, notably demonstrated by recent works such as BitNet \cite{wang2023bitnet} and the conceptual advancement in "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era}. These foundational studies have set the stage for significant reductions in energy consumption and memory usage without sacrificing performance. Building upon these groundbreaking concepts, our work introduces an innovative extension by adapting the 1.58-bit quantization technique to convolutional layers, an expansion beyond the original linear layer implementations. This extension is meticulously evaluated across widely-utilized convolutional architectures such as MobileNet and ResNet, and tested on standard datasets including CIFAR-10/100, MNIST, and CelebA. Our findings reveal nuanced insights into the behavior of these architectures under the 1.58-bit regime, highlighting performance retention and efficiency gains across varied tasks. Furthermore, in an effort to foster reproducibility and facilitate further research, we accompany our paper with open-source code. This codebase not only enables the replication of our experimental results but also allows users to automatically generate the relevant graphs and performance metrics, thereby advancing the collective understanding and application of 1.58-bit technology in modern neural networks.
+The rapid evolution of large language models (LLMs) towards 1-bit architectures has proven effective in reducing their energy and memory footprint. Landmark studies such as BitNet \cite{wang2023bitnet} and "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} have paved the way for significant efficiency improvements without compromising performance. Extending these innovations, this paper explores the application of 1.58-bit quantization to convolutional neural networks (CNNs), specifically examining MobileNet and ResNet architectures. We conduct extensive experiments on well-known datasets including CIFAR-10/100, MNIST, and CelebA, analyzing the impacts of reduced bit-width on these networks. Our results reveal that while the performance of some models slightly decreases, the efficiency gains are substantial. We complement our study with open-source code to foster reproducibility and enable further academic and practical advancements.
 \end{abstract}
-
 
 \section{Introduction}
 
-The ever-increasing computational demands of large language models (LLMs) necessitate innovations in model architecture that can reduce energy and memory requirements without compromising performance. Recent advancements in 1-bit architectures have shown promising results in addressing these challenges. Pioneering studies like the BitNet \cite{wang2023bitnet} and subsequent developments such as those described in "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} have introduced scalable and efficient solutions that maintain competitive performance metrics.
+The escalating computational demands of large language models necessitate continuous innovation to optimize their architecture for reduced energy consumption and memory usage without sacrificing performance. Recent advances have demonstrated the potential of 1-bit architectures in achieving these goals, with studies such as BitNet \cite{wang2023bitnet} and "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} providing foundational frameworks that balance scalability and computational efficiency. However, the adaptation of these techniques to convolutional neural networks (CNNs) presents unique challenges, particularly in maintaining performance metrics across diverse tasks and datasets. This research extends the 1.58-bit quantization approach, previously confined to linear models, to prominent CNN architectures such as MobileNet and ResNet. Through rigorous testing on CIFAR-10/100, MNIST, and CelebA datasets, we offer a comprehensive evaluation of how CNNs perform under the constraints of reduced bit-width, providing valuable insights into the potential and limitations of further bit reduction in neural network architectures. This paper not only details our findings but also contributes to the community by releasing our experimental framework as open-source software, ensuring that our results are reproducible and that the methodologies employed can be further explored and enhanced by the research community.
 
-Building on this foundational work, our research extends the 1.58-bit quantization approach, previously applied only to linear layers, to convolutional layers. This extension aims to explore and understand how standard convolutional architectures—such as MobileNet and ResNet—perform when adapted to this reduced bit-width paradigm. By conducting comprehensive experiments across various datasets including CIFAR-10/100, MNIST, and CelebA, we provide a detailed analysis of the impact of 1.58-bit quantization on these models.
 
-In addition to empirical evaluations, this paper contributes to the field by releasing open-source code, enabling both replication of our results and further experimentation by the community. This not only underscores our commitment to transparency but also facilitates a deeper engagement with the technology, allowing for continuous improvements and adaptations.
+The significance of this research extends beyond the technical advancements, as it addresses the pressing need for environmentally sustainable and inclusive AI development. By exploring the potential of 1.58-bit quantization in convolutional neural networks, we aim to contribute to a more energy-efficient and equitable AI ecosystem. Our work has the potential to enable the widespread adoption of AI technologies in resource-constrained settings, such as edge devices or developing regions, and to reduce the environmental impact of large-scale AI deployments, aligning with the United Nations' Sustainable Development Goals (SDGs) related to climate action and digital inclusion.
 
-This introduction outlines the structure of the paper, which details our methodology, results, and insights into the application of 1.58-bit technology in convolutional neural networks, potentially setting a new standard for efficiency in the field.
+\section{Methodology}
+
+The core innovation of our methodology lies in adapting the 1.58-bit quantization technique, originally applied to linear layers, to convolutional neural networks. The convolutional operation, fundamentally linear in its application of weights to inputs, permits a direct transposition of the quantization techniques used for linear models.
+
+The quantization approach is based on the absmean quantization function described in "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era}, which involves scaling the weight matrix by its average absolute value, then rounding each value to the nearest integer among \{-1, 0, +1\}.
+
+The following pseudocode details the quantization function for both linear and convolutional layers:
+\begin{algorithm}
+  \caption{Quantization Function}
+  \begin{algorithmic}[1]
+  \Function{QuantizeWeights}{$weights$, $gamma$, $epsilon$}
+      \State $scaled\_weights \gets weights / (gamma + epsilon)$
+      \State $rounded\_weights \gets \Call{Round}{scaled\_weights}$
+      \State $bin\_weights\_no\_grad \gets \Call{Clamp}{rounded\_weights, -1, 1}$
+      \State \Return $(bin\_weights\_no\_grad - weights).detach() + weights$
+  \EndFunction
+  \end{algorithmic}
+  \end{algorithm}
+
+
+Both layer types utilize the \textit{weights\_gamma} factor, defined as $\gamma$, to scale the weights matrix by its average absolute value before rounding:
+\[
+\gamma = \frac{1}{nm} \sum_{ij} |W_{ij}| \tag{3}
+\]
+Here, $nm$ represents the total number of weights.
+
+The similarity in handling the weights between the two layer types highlights the universality and adaptability of our quantization approach. The primary difference lies in the type of operation: while \textit{BitLinear} applies a matrix multiplication, \textit{BitConv2d} applies a convolutional filter operation. However, the quantization and dequantization steps remain identical, underscoring the consistency of our approach across different types of neural network layers.
+
+This methodological adaptation is crucial for extending the benefits of 1.58-bit quantization—namely, significant reductions in memory and computational overhead—to a broader range of architectures and applications. The technical contribution of this research lies in demonstrating.
+
+Reference to these equations and their implementation in both types of neural network layers ensures that our approach maintains high efficiency while adapting to the specific demands and operational characteristics of convolutional networks.
+
 
 \bibliographystyle{plain}
 \bibliography{references}
