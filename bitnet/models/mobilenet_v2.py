@@ -7,6 +7,8 @@ from itertools import repeat
 import collections.abc
 import warnings
 
+import multiprocessing as mp
+
 import torch
 from torch import nn, Tensor
 from torch.hub import load_state_dict_from_url
