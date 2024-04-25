@@ -35,7 +35,7 @@ def generate_latex_table_and_graph(results):
         std_floatnet = np.std(floatnet_data.get('scores', [0]))
         num_params = bitnet_data.get('num_parameters', 0)
 
-        discrepancy = abs(mean_bitnet - mean_floatnet)
+        discrepancy = 100 * abs(mean_bitnet - mean_floatnet) / mean_floatnet if mean_floatnet != 0 else 0
 
         plot_data[architecture].append((num_params, discrepancy))
 
@@ -57,8 +57,9 @@ def generate_latex_table_and_graph(results):
                    "\\begin{tikzpicture}\n" \
                    "\\begin{axis}[\n" \
                    "xlabel={Number of Parameters},\n" \
-                   "ylabel={Accuracy Discrepancy},\n" \
-                   "legend style={at={(0.5,-0.15)},anchor=north,legend columns=-1},\n"
+                   "ylabel={Discrepancy (\%)}," + "\n" \
+                   "legend style={at={(0.5,-0.20)},anchor=north,legend columns=-1},\n" \
+                   "grid=major," + "\n"
 
     if use_log_scale:
         graph_footer += "xmode=log,\nlog basis x={10},\n"
@@ -72,7 +73,7 @@ def generate_latex_table_and_graph(results):
 
     graph_footer += "\\end{axis}\n" \
                     "\\end{tikzpicture}\n" \
-                    "\\caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}\n" \
+                    "\\caption{Correlation between number of parameters and metric discrepancy for BitNet and FloatNet.}\n" \
                     "\\label{fig:discrepancy_plot}\n" \
                     "\\end{figure}\n"
 
