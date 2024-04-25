@@ -65,7 +65,7 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
     num_classes: int        = 10
     learning_rate: float    = 1e-3
     num_epochs: int         = 10
-    batch_size: int         = 128
+    batch_size: int         = 256
 
     transform = transforms.Compose([
         transforms.ToTensor(),
