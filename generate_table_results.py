@@ -5,8 +5,6 @@ import re
 from bitnet.config import ProjectConfig
 
 
-import numpy as np
-
 def generate_latex_table_and_graph(results):
     header = "\\begin{table}[h]\n" \
              "\\centering\n" \
@@ -39,10 +37,8 @@ def generate_latex_table_and_graph(results):
 
         discrepancy = abs(mean_bitnet - mean_floatnet)
 
-        # Append data for the scatter plot
         plot_data[architecture].append((num_params, discrepancy))
 
-        # Compare scores and bold the best
         mean_accuracy_bitnet = f"\\textbf{{{mean_bitnet:.2f}}}" if mean_bitnet > mean_floatnet else f"{mean_bitnet:.2f}"
         mean_accuracy_floatnet = f"\\textbf{{{mean_floatnet:.2f}}}" if mean_floatnet > mean_bitnet else f"{mean_floatnet:.2f}"
 
@@ -53,7 +49,6 @@ def generate_latex_table_and_graph(results):
     all_params = [data.get('num_parameters', 0) for models in results.values() for data in models.values()]
     use_log_scale = max(all_params) / min(all_params) > 100
 
-    # Prepare the scatter plot data with different colors
     colors = ['blue', 'red', 'green', 'brown', 'cyan', 'magenta', 'orange', 'black', 'purple', 'yellow']
     color_map = {arch: color for arch, color in zip(sorted(architectures), colors)}
 
@@ -91,7 +86,6 @@ def insert_table_into_document(document_path, table_data):
 
     pattern = r'% BEGIN_TABLE.*?% END_TABLE'
     replacement = f'% BEGIN_TABLE\n{table_data}\n% END_TABLE'
-    # Ensure all backslashes in the replacement text are escaped properly
     replacement = replacement.replace('\\', '\\\\')
     new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
 
