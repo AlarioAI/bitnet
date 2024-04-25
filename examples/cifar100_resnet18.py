@@ -60,7 +60,7 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    floatnet = train_model(floatnet, train_loader, val_loader, floatnet_optimizer, criterion, num_epochs)test_model(floatnet, test_loader)
+    floatnet = train_model(floatnet, train_loader, val_loader, floatnet_optimizer, criterion, num_epochs)
     results, metrics_used = test_model(floatnet, test_loader)
     return_value.update(results)
 
