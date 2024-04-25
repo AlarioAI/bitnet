@@ -26,8 +26,8 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
-    bitnet = resnet18(BitLinear, BitConv2d, pretrained=True, num_classes=num_classes)
-    floatnet = resnet18(nn.Linear, nn.Conv2d, pretrained=True, num_classes=num_classes)
+    bitnet = resnet18(BitLinear, BitConv2d, pretrained=False, num_classes=num_classes)
+    floatnet = resnet18(nn.Linear, nn.Conv2d, pretrained=False, num_classes=num_classes)
     num_params_bitnet: int = sum(p.numel() for p in bitnet.parameters() if p.requires_grad)
     num_params_floatnet: int = sum(p.numel() for p in floatnet.parameters() if p.requires_grad)
     assert num_params_bitnet == num_params_floatnet

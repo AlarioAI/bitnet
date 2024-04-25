@@ -164,3 +164,4 @@ cython_debug/
 examples/mnist_data
 mnist_data
 cifar_data
+stl10_data

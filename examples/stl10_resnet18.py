@@ -3,7 +3,9 @@ from torch import nn
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 
-from bitnet.models.mobilenet_v2 import mobilenet_v2, bit_mobilenet_v2
+from bitnet.nn.bitlinear import BitLinear
+from bitnet.nn.bitconv2d import BitConv2d
+from bitnet.models.resnet import resnet18
 from bitnet.metrics import Metrics
 from bitnet.seed import set_seed
 from bitnet.base_experiment import train_model, test_model
@@ -14,18 +16,18 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
     set_seed(seed)
     return_value: dict[str, float] = {}
 
-    num_classes: int        = 100
+    num_classes: int        = 10
     learning_rate: float    = 1e-3
     num_epochs: int         = 10
     batch_size: int         = 256
 
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize([0.5071, 0.4865, 0.4409], [0.2623, 0.2513, 0.2714])
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
-    bitnet =  bit_mobilenet_v2(num_classes=num_classes, pretrained=False)
-    floatnet = mobilenet_v2(num_classes, pretrained=False)
+    bitnet = resnet18(BitLinear, BitConv2d, pretrained=False, num_classes=num_classes)
+    floatnet = resnet18(nn.Linear, nn.Conv2d, pretrained=False, num_classes=num_classes)
     num_params_bitnet: int = sum(p.numel() for p in bitnet.parameters() if p.requires_grad)
     num_params_floatnet: int = sum(p.numel() for p in floatnet.parameters() if p.requires_grad)
     assert num_params_bitnet == num_params_floatnet
@@ -35,8 +37,8 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
 
     criterion = nn.CrossEntropyLoss()
 
-    train_dataset = datasets.CIFAR100('./cifar_data', train=True, download=True, transform=transform)
-    test_dataset = datasets.CIFAR100('./cifar_data', train=False, download=True, transform=transform)
+    train_dataset = datasets.STL10('./stl10_data', split='train', download=True, transform=transform)
+    test_dataset = datasets.STL10('./stl10_data', split='test', download=True, transform=transform)
 
     set_seed(seed)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
