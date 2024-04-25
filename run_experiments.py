@@ -1,7 +1,6 @@
 import importlib
 import json
 from glob import glob
-from multiprocessing import Pool
 
 from bitnet.config import ProjectConfig, ExperimentConfig
 
@@ -22,31 +21,15 @@ def run_experiment(module_name: str) -> dict:
     return return_dict
 
 
-def run_experiments_chunk(experiments):
-    results = {}
-    for exp in experiments:
-        results.update(run_experiment(exp))
-    return results
-
-
 def main():
     results: dict = {}
     experiments: list[str] = glob(f"{ProjectConfig.EXAMPLES_DIR}/*py")
     experiments = [exp.replace("/", ".").replace(".py", "") for exp in experiments]
+    for exp in experiments:
+        results.update(run_experiment(exp))
 
-    chunk_size: int = ExperimentConfig.NUM_PARALLEL_EXP
-
-    chunks: list[list[str]] = [experiments[i:i + chunk_size] for i in range(0, len(experiments), chunk_size)]
-
-    with Pool() as pool:
-        for chunk_idx, chunk in enumerate(chunks):
-            print(f"Running experiments in chunk {chunk_idx + 1}/{len(chunks)}...")
-            results_list = pool.map(run_experiments_chunk, [chunk])
-            for result in results_list:
-                results.update(result)
-            with open(f"{ProjectConfig.RESULTS_FILE}_{chunk_idx}.json", 'w') as f:
-                json.dump(results, f, indent=4)
-            results.clear()
+        with open(f"{ProjectConfig.RESULTS_FILE}", 'w') as f:
+            json.dump(results, f, indent=4)
 
 
 if __name__ == '__main__':

@@ -92,7 +92,7 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
         shuffle=False,
         num_workers=int(mp.cpu_count() / ExperimentConfig.NUM_PARALLEL_EXP)
     )
-    floatnet = train_model(floatnet, train_loader, val_loader, floatnet_optimizer, criterion, num_epochs)test_model(floatnet, test_loader)
+    floatnet = train_model(floatnet, train_loader, val_loader, floatnet_optimizer, criterion, num_epochs)
     results, metrics_used = test_model(floatnet, test_loader)
     return_value.update(results)
 

@@ -35,15 +35,17 @@ def generate_latex_table_and_graph(results):
         std_floatnet = np.std(floatnet_data.get('scores', [0]))
         num_params = bitnet_data.get('num_parameters', 0)
 
-        discrepancy = 100 * abs(mean_bitnet - mean_floatnet) / mean_floatnet if mean_floatnet != 0 else 0
+        discrepancy = 100 * (mean_bitnet - mean_floatnet) / mean_floatnet if mean_floatnet != 0 else 0
 
         plot_data[architecture].append((num_params, discrepancy))
 
-        mean_accuracy_bitnet = f"\\textbf{{{mean_bitnet:.2f}}}" if mean_bitnet > mean_floatnet else f"{mean_bitnet:.2f}"
-        mean_accuracy_floatnet = f"\\textbf{{{mean_floatnet:.2f}}}" if mean_floatnet > mean_bitnet else f"{mean_floatnet:.2f}"
+        mean_acc_bitnet = f"\\textbf{{{mean_bitnet:.2f}}}" if mean_bitnet > mean_floatnet else f"{mean_bitnet:.2f}"
+        mean_acc_floatnet = f"\\textbf{{{mean_floatnet:.2f}}}" if mean_floatnet > mean_bitnet else f"{mean_floatnet:.2f}"
+        std_acc_bitnet = f"\\textbf{{{std_bitnet:.2f}}}" if std_floatnet > std_bitnet else f"{std_floatnet:.2f}"
+        std_acc_floatnet = f"\\textbf{{{std_floatnet:.2f}}}" if std_bitnet > std_floatnet else f"{std_floatnet:.2f}"
 
-        body += f"{architecture} & {dataset} & BitNet & {mean_accuracy_bitnet} & {std_bitnet:.2f} \\\\\n"
-        body += f"{architecture} & {dataset} & FloatNet & {mean_accuracy_floatnet} & {std_floatnet:.2f} \\\\\n"
+        body += f"{architecture} & {dataset} & BitNet & {mean_acc_bitnet} & {std_acc_bitnet} \\\\\n"
+        body += f"{architecture} & {dataset} & FloatNet & {mean_acc_floatnet} & {std_acc_floatnet} \\\\\n"
         body += "\\Xhline{2\\arrayrulewidth}\n"
 
     all_params = [data.get('num_parameters', 0) for models in results.values() for data in models.values()]
