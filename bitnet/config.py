@@ -9,5 +9,6 @@ class ProjectConfig:
 
 
 class ExperimentConfig:
-    NUM_RUNS = 10
-    SEED = 53
+    NUM_RUNS: int = 10
+    SEED: int = 53
+    VALIDATION_SIZE: float = 0.2
