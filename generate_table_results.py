@@ -1,8 +1,15 @@
 import json
-import numpy as np
 import re
+from collections import OrderedDict
+
+import numpy as np
 
 from bitnet.config import ProjectConfig
+
+def sort_by_architecture(data: dict):
+    sorted_keys = sorted(data.keys(), key=lambda x: (x.split("_")[1], x.split("_")[0]))
+    sorted_dict = OrderedDict((key, data[key]) for key in sorted_keys)
+    return sorted_dict
 
 
 def generate_latex_table_and_graph(results):
@@ -22,9 +29,15 @@ def generate_latex_table_and_graph(results):
     plot_data_params = {}
     plot_data_trainset = {}
 
+    results = sort_by_architecture(results)
+
+    current_architecture: str | None = None
+
     for experiment, models in results.items():
         dataset, architecture = experiment.split('_')
+
         architectures.add(architecture)
+
         if architecture not in plot_data_params:
             plot_data_params[architecture] = []
             plot_data_trainset[architecture] = []
@@ -48,9 +61,15 @@ def generate_latex_table_and_graph(results):
         std_acc_bitnet = f"\\textbf{{{std_bitnet:.2f}}}" if std_floatnet > std_bitnet else f"{std_bitnet:.2f}"
         std_acc_floatnet = f"\\textbf{{{std_floatnet:.2f}}}" if std_bitnet > std_floatnet else f"{std_floatnet:.2f}"
 
+        if current_architecture and current_architecture != architecture:
+            body += "\\Xhline{2\\arrayrulewidth}\n"
+
         body += f"{architecture} & {dataset} & BitNet & {mean_acc_bitnet} & {std_acc_bitnet} \\\\\n"
         body += f"{architecture} & {dataset} & FloatNet & {mean_acc_floatnet} & {std_acc_floatnet} \\\\\n"
-        body += "\\Xhline{2\\arrayrulewidth}\n"
+
+        current_architecture = architecture
+
+    body += "\\Xhline{2\\arrayrulewidth}\n"
 
     all_params = [data.get('num_parameters', 0) for models in results.values() for data in models.values()]
     all_trainset_sizes = [data.get('trainset_size', 0) for models in results.values() for data in models.values()]
@@ -111,7 +130,6 @@ def generate_latex_table_and_graph(results):
                              "\\end{figure}\n"
 
     return f"{header}{body}{footer}{graph_params_footer}{graph_trainset_footer}"
-
 
 
 def insert_table_into_document(document_path, table_data):
