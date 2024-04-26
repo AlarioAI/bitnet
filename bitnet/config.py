@@ -6,6 +6,7 @@ class ProjectConfig:
     PAPER_DIR: str = "paper"
     RESULTS_FILE: str = os.path.join(PAPER_DIR, "experiment_results.json")
     PAPER_TEX_PATH: str = os.path.join(f"{PAPER_DIR}", "main.tex")
+    TABLE_TEX_PATH: str = os.path.join(f"{PAPER_DIR}", "table.tex")
 
 
 class ExperimentConfig:

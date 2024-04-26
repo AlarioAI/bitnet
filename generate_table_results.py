@@ -132,28 +132,21 @@ def generate_latex_table_and_graph(results):
     return f"{header}{body}{footer}{graph_params_footer}{graph_trainset_footer}"
 
 
-def insert_table_into_document(document_path, table_data):
-    with open(document_path, 'r') as file:
-        content = file.read()
-
-    pattern = r'% BEGIN_TABLE.*?% END_TABLE'
-    replacement = f'% BEGIN_TABLE\n{table_data}\n% END_TABLE'
-    replacement = replacement.replace('\\', '\\\\')
-    new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
-
-    with open(document_path, 'w') as file:
-        file.write(new_content)
+def generate_table_tex_file(table_data, output_path='table.tex'):
+    with open(output_path, 'w') as file:
+        file.write(table_data)
 
 
 def main():
     results_file = ProjectConfig.RESULTS_FILE
-    latex_document_path = ProjectConfig.PAPER_TEX_PATH
+    table_tex_path = ProjectConfig.TABLE_TEX_PATH
 
     with open(results_file, 'r') as f:
         results = json.load(f)
 
     table_data = generate_latex_table_and_graph(results)
-    insert_table_into_document(latex_document_path, table_data)
+    generate_table_tex_file(table_data, table_tex_path)
+
 
 
 if __name__ == '__main__':
