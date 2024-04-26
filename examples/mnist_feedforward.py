@@ -14,7 +14,7 @@ from bitnet.models.feedforward import Feedforward
 from bitnet.base_experiment import train_model, test_model
 
 
-def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
+def run(seed: int | None) -> tuple[dict[str, float], Metrics, int, int]:
 
     set_seed(seed)
     return_value: dict[str, float] = {}
@@ -96,8 +96,9 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int]:
     floatnet = train_model(floatnet, train_loader, val_loader, floatnet_optimizer, criterion, num_epochs)
     results, metrics_used = test_model(floatnet, test_loader)
     return_value.update(results)
+    trainset_size: int = len(train_dataset)
 
-    return return_value, metrics_used, num_params_bitnet
+    return return_value, metrics_used, num_params_bitnet, trainset_size
 
 
 if __name__ == "__main__":
