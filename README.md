@@ -1,13 +1,15 @@
 # BITNET
 ![bitnet](/assets/main_image.png)
-PyTorch implementations for training and evaluating 1.58-bits neural networks. It covers methods and models from the following research papers:
+----
+This repository not only provides PyTorch implementations for training and evaluating 1.58-bit neural networks but also includes a unique integration where the experiments conducted automatically update a LaTeX-generated paper. By applying 1.58-bit quantization to convolutional neural networks and building upon transformative research in the field, this project extends beyond simple implementation to create a living document that evolves with ongoing experimentation. Our approach broadens the application of concepts introduced in seminal papers, fostering both reproducibility and real-time documentation of findings.
 
 
 ## Papers
-* [BitNet: Scaling 1-bit Transformers for Large Language Models:](https://arxiv.org/pdf/2310.11453.pdf)
-    "The implementation of the BitNet architecture is quite simple, requiring only the replacement of linear projections (i.e., nn.Linear in PyTorch) in the Transformer. " -- BitNet is really easy to implement just swap out the linears with the BitLinear modules!
-* [The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits](https://arxiv.org/pdf/2402.17764.pdf)
-    **Extends BitNet to 1.58 bits:** Introduces modifications to the original BitNet architecture, including a novel quantization function (absmean) for the weights and a revised approach for handling activation outputs. These changes enable training with 1.58-bit weights while maintaining efficiency and performance.
+* **BitNet: Scaling 1-bit Transformers for Large Language Models:** This paper introduced the simple yet effective concept of replacing linear projections with 1-bit counterparts. We extend this methodology to convolutional layers to explore broader applications in neural network architectures.
+    * [Read the paper](https://arxiv.org/pdf/2310.11453.pdf)
+* **The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits:** This paper extends the BitNet architecture to use 1.58-bit quantization and introduces novel quantization functions. Our work utilizes these innovations across different types of neural networks.
+    * [Read the paper](https://arxiv.org/pdf/2402.17764.pdf)
+
 
 
 ## Installation
@@ -26,16 +28,16 @@ python3.11 -m pip install https://github.com/AlarioAI/bitnet.git
 
 ## Usage:
 
-### `BitLinear`
+### `BitConv2d`
 ```python
 import torch
-from bitnet.nn.bitlinear import BitLinear
+from bitnet.nn.bitconv2d import BitConv2d
 
-_input = torch.randn(10, 512)
-layer = BitLinear(512, 400)
+_input = torch.randn(64, 3, 32, 32)
+layer = BitConv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
 output = layer(_input)
 
-print(output)
+print(output.shape)
 ```
 ----
 
@@ -45,17 +47,18 @@ print(output)
 1. **Feedforward** `MNIST`
 Train a one-hidden layer 1.58bits neural network on the MNIST dataset
 ```sh
-python examples/mnist_ff_example.py
+python examples/mnist_feedforward.py
 ```
 2. **LeNet5** `MNIST`
 Train the classic LeNet5 with 1.58bits linear and convolutional layers
 ```sh
-python examples/mnist_lenet5_example.py
+python examples/mnist_lenet5.py
 ```
 
-### Run all experiments with different seeds:
+### Run all experiments with different seeds and update the `tex` file:
 ```sh
 python run_experiemnts.py
+python generate_table_results.py
 ```
 
 # License

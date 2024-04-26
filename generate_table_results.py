@@ -148,6 +148,5 @@ def main():
     generate_table_tex_file(table_data, table_tex_path)
 
 
-
 if __name__ == '__main__':
     main()
