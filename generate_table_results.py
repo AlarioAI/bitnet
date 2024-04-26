@@ -19,13 +19,15 @@ def generate_latex_table_and_graph(results):
 
     body = ""
     architectures = set()
-    plot_data = {}
+    plot_data_params = {}
+    plot_data_trainset = {}
 
     for experiment, models in results.items():
         dataset, architecture = experiment.split('_')
         architectures.add(architecture)
-        if architecture not in plot_data:
-            plot_data[architecture] = []
+        if architecture not in plot_data_params:
+            plot_data_params[architecture] = []
+            plot_data_trainset[architecture] = []
 
         bitnet_data = models.get('BitNet', {})
         floatnet_data = models.get('FloatNet', {})
@@ -34,14 +36,16 @@ def generate_latex_table_and_graph(results):
         std_bitnet = np.std(bitnet_data.get('scores', [0]))
         std_floatnet = np.std(floatnet_data.get('scores', [0]))
         num_params = bitnet_data.get('num_parameters', 0)
+        trainset_size = bitnet_data.get('trainset_size', 0)
 
         discrepancy = 100 * (mean_bitnet - mean_floatnet) / mean_floatnet if mean_floatnet != 0 else 0
 
-        plot_data[architecture].append((num_params, discrepancy))
+        plot_data_params[architecture].append((num_params, discrepancy))
+        plot_data_trainset[architecture].append((trainset_size, discrepancy))
 
         mean_acc_bitnet = f"\\textbf{{{mean_bitnet:.2f}}}" if mean_bitnet > mean_floatnet else f"{mean_bitnet:.2f}"
         mean_acc_floatnet = f"\\textbf{{{mean_floatnet:.2f}}}" if mean_floatnet > mean_bitnet else f"{mean_floatnet:.2f}"
-        std_acc_bitnet = f"\\textbf{{{std_bitnet:.2f}}}" if std_floatnet > std_bitnet else f"{std_floatnet:.2f}"
+        std_acc_bitnet = f"\\textbf{{{std_bitnet:.2f}}}" if std_floatnet > std_bitnet else f"{std_bitnet:.2f}"
         std_acc_floatnet = f"\\textbf{{{std_floatnet:.2f}}}" if std_bitnet > std_floatnet else f"{std_floatnet:.2f}"
 
         body += f"{architecture} & {dataset} & BitNet & {mean_acc_bitnet} & {std_acc_bitnet} \\\\\n"
@@ -49,37 +53,64 @@ def generate_latex_table_and_graph(results):
         body += "\\Xhline{2\\arrayrulewidth}\n"
 
     all_params = [data.get('num_parameters', 0) for models in results.values() for data in models.values()]
-    use_log_scale = max(all_params) / min(all_params) > 100
+    all_trainset_sizes = [data.get('trainset_size', 0) for models in results.values() for data in models.values()]
+    use_log_scale_params = max(all_params) / min(all_params) > 100
+    use_log_scale_trainset = max(all_trainset_sizes) / min(all_trainset_sizes) > 100
 
     colors = ['blue', 'red', 'green', 'brown', 'cyan', 'magenta', 'orange', 'black', 'purple', 'yellow']
     color_map = {arch: color for arch, color in zip(sorted(architectures), colors)}
 
-    graph_footer = "\\begin{figure}[h]\n" \
-                   "\\centering\n" \
-                   "\\begin{tikzpicture}\n" \
-                   "\\begin{axis}[\n" \
-                   "xlabel={Number of Parameters},\n" \
-                   "ylabel={Discrepancy (\%)}," + "\n" \
-                   "legend style={at={(0.5,-0.20)},anchor=north,legend columns=-1},\n" \
-                   "grid=major," + "\n"
+    graph_params_footer = "\\begin{figure}[h]\n" \
+                          "\\centering\n" \
+                          "\\begin{tikzpicture}\n" \
+                          "\\begin{axis}[\n" \
+                          "xlabel={Number of Parameters},\n" \
+                          "ylabel={Discrepancy (\%)}," + "\n" \
+                          "legend style={at={(0.5,-0.20)},anchor=north,legend columns=-1},\n" \
+                          "grid=major," + "\n"
 
-    if use_log_scale:
-        graph_footer += "xmode=log,\nlog basis x={10},\n"
+    if use_log_scale_params:
+        graph_params_footer += "xmode=log,\nlog basis x={10},\n"
 
-    graph_footer += "]\n"
+    graph_params_footer += "]\n"
     for arch, color in color_map.items():
-        graph_footer += f"\\addplot[only marks, mark=*, color={color}] coordinates {{\n"
-        for params, discrepancy in plot_data[arch]:
-            graph_footer += f"({params},{discrepancy})\n"
-        graph_footer += f"}};\n\\addlegendentry{{{arch}}}\n"
+        graph_params_footer += f"\\addplot[only marks, mark=*, color={color}] coordinates {{\n"
+        for params, discrepancy in plot_data_params[arch]:
+            graph_params_footer += f"({params},{discrepancy})\n"
+        graph_params_footer += f"}};\n\\addlegendentry{{{arch}}}\n"
 
-    graph_footer += "\\end{axis}\n" \
-                    "\\end{tikzpicture}\n" \
-                    "\\caption{Correlation between number of parameters and metric discrepancy for BitNet and FloatNet.}\n" \
-                    "\\label{fig:discrepancy_plot}\n" \
-                    "\\end{figure}\n"
+    graph_params_footer += "\\end{axis}\n" \
+                           "\\end{tikzpicture}\n" \
+                           "\\caption{Correlation between number of parameters and metric discrepancy for BitNet and FloatNet.}\n" \
+                           "\\label{fig:params_discrepancy_plot}\n" \
+                           "\\end{figure}\n"
 
-    return f"{header}{body}{footer}{graph_footer}"
+    graph_trainset_footer = "\\begin{figure}[h]\n" \
+                            "\\centering\n" \
+                            "\\begin{tikzpicture}\n" \
+                            "\\begin{axis}[\n" \
+                            "xlabel={Training Dataset Size},\n" \
+                            "ylabel={Discrepancy (\%)}," + "\n" \
+                            "legend style={at={(0.5,-0.20)},anchor=north,legend columns=-1},\n" \
+                            "grid=major," + "\n"
+
+    if use_log_scale_trainset:
+        graph_trainset_footer += "xmode=log,\nlog basis x={10},\n"
+
+    graph_trainset_footer += "]\n"
+    for arch, color in color_map.items():
+        graph_trainset_footer += f"\\addplot[only marks, mark=*, color={color}] coordinates {{\n"
+        for trainset_size, discrepancy in plot_data_trainset[arch]:
+            graph_trainset_footer += f"({trainset_size},{discrepancy})\n"
+        graph_trainset_footer += f"}};\n\\addlegendentry{{{arch}}}\n"
+
+    graph_trainset_footer += "\\end{axis}\n" \
+                             "\\end{tikzpicture}\n" \
+                             "\\caption{Correlation between training dataset size and metric discrepancy for BitNet and FloatNet.}\n" \
+                             "\\label{fig:trainset_discrepancy_plot}\n" \
+                             "\\end{figure}\n"
+
+    return f"{header}{body}{footer}{graph_params_footer}{graph_trainset_footer}"
 
 
 
