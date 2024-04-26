@@ -287,4 +287,88 @@
 
 # # Add more tests based on the scenarios and edge cases you want to cover.
 
+
+import time
+
+import torch
+
 from bitnet.nn.bitconv2d import BinaryConv2D
+import torch.nn as nn
+
+
+def test_binary_conv2d():
+    # Create a simple input tensor and weights
+    input_tensor = torch.tensor([[[[4, 5, 4],
+                                   [6, 3, 9],
+                                   [8, 1, 2]]]], dtype=torch.float32)
+    weight_tensor = torch.tensor([[[[0, 1],
+                                    [1, 0]]],
+                                  [[[1, 0],
+                                    [0, 1]]]], dtype=torch.float32)
+
+
+    bias_tensor = torch.tensor([[1.0, -1.0],
+                                [-1.0, 1.0]], dtype=torch.float32)
+
+    bias_tensor = None
+    print(f"\n{bias_tensor=}")
+
+    expected_output = nn.functional.conv2d(input_tensor, weight_tensor, bias=bias_tensor, stride=1, padding=0, dilation=1, groups=1)
+    output = BinaryConv2D.apply(None, input_tensor, weight_tensor, bias_tensor)
+
+    assert output is not None, "Output is None"
+    assert torch.allclose(output, expected_output), f"Output: {output} does not match Expected: {expected_output}"
+
+
+def test_multi_channel():
+    input_tensor = torch.tensor([[
+        [[1, 2, 3], [4, 5, 6], [7, 8, 9]],   # Red channel
+        [[9, 8, 7], [6, 5, 4], [3, 2, 1]],   # Green channel
+        [[1, 1, 1], [1, 1, 1], [1, 1, 1]]    # Blue channel
+    ]], dtype=torch.float32)
+
+    weight_tensor = torch.tensor([
+        [
+            [[1, -1], [0, 1]],  # Filter for Red channel
+            [[0, 1], [-1, 0]],  # Filter for Green channel
+            [[1, 1], [1, 1]]    # Filter for Blue channel
+        ]
+    ], dtype=torch.float32)
+
+    # Using the function
+    output = BinaryConv2D.apply(None, input_tensor, weight_tensor)
+    print(f"\nbinary {output=}")
+
+
+    expected_output = nn.functional.conv2d(input_tensor,
+                                           weight_tensor,
+                                           bias=None,
+                                           stride=1,
+                                           padding=0,
+                                           dilation=1,
+                                           groups=1)
+    print(f"\nfloat {output=}")
+
+    assert output is not None, "Output is None"
+    assert torch.allclose(output, expected_output), f"Output: {output} does not match Expected: {expected_output}"
+
+
+def test_performance():
+    input_tensor = torch.randn(1, 1, 32, 32)
+    weight_tensor = torch.randn(6, 1, 5, 5)
+
+    num_runs = 10
+    start_time = time.time()
+    for _ in range(num_runs):
+        BinaryConv2D.apply(None, input_tensor, weight_tensor)
+
+    end_time = time.time()
+    print(f"Average execution time per binary run: {(end_time - start_time) / num_runs} seconds")
+
+    num_runs = 10
+    start_time = time.time()
+    for _ in range(num_runs):
+        nn.functional.conv2d(input_tensor, weight_tensor, bias=None, stride=1, padding=0, dilation=1, groups=1)
+
+    end_time = time.time()
+    print(f"Average execution time per float run: {(end_time - start_time) / num_runs} seconds")

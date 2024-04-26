@@ -64,22 +64,31 @@ class BitConv2d(nn.Conv2d):
 
 class BinaryConv2D(Function):
     @staticmethod
-    def forward(ctx, input, weight, bias=None):
-        batch_size, input_channels, input_height, input_width = input.shape
-        _, weight_channels, kernel_height, kernel_width = weight.shape
+    def forward(_ctx, _, input, weight, bias=None) -> Tensor:
+        batch_size, _input_channels, input_height, input_width = input.shape
+        num_filters, _, kernel_height, kernel_width = weight.shape
 
-        output = torch.zeros((batch_size, weight_channels, input_height, input_width), device=input.device)
+        output_height = input_height - kernel_height + 1
+        output_width = input_width - kernel_width + 1
+        output = torch.zeros((batch_size, num_filters, output_height, output_width), device=input.device)
 
-        for oc in range(weight_channels):
-            binary_weights = weight[:, oc, :, :]
+        for i in range(output_height):
+            for j in range(output_width):
+                for oc in range(num_filters):
+                    region = input[:, :, i:i+kernel_height, j:j+kernel_width]
+                    positive_mask = (weight[oc, :, :, :] == 1)
+                    negative_mask = (weight[oc, :, :, :] == -1)
 
-            mask = binary_weights.bool()
+                    if positive_mask.any():
+                        positive_inputs = torch.masked_select(region, positive_mask[None, :, :, :])
+                        output[:, oc, i, j] += positive_inputs.sum()
 
-            selected_inputs = input[:, mask, :, :]
+                    if negative_mask.any():
+                        negative_inputs = torch.masked_select(region, negative_mask[None, :, :, :])
+                        output[:, oc, i, j] -= negative_inputs.sum()
 
-            output[:, oc, :, :] = selected_inputs.sum(dim=1)
 
         if bias is not None:
-            output += bias
+            output += bias #.view(num_filters, 1, 1,)
 
         return output
