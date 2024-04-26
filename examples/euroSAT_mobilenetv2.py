@@ -2,13 +2,11 @@ import multiprocessing as mp
 
 import torch
 from torch import nn
-from torchvision import transforms, datasets
+from torchvision import transforms
 from torch.utils.data import DataLoader
-from torch.utils.data import random_split
 
-from bitnet.nn.bitlinear import BitLinear
-from bitnet.nn.bitconv2d import BitConv2d
-from bitnet.models.lenet5 import LeNet
+from bitnet.datasets.eurosat import EuroSAT
+from bitnet.models.mobilenet_v2 import mobilenet_v2, bit_mobilenet_v2
 from bitnet.metrics import Metrics
 from bitnet.seed import set_seed
 from bitnet.config import ExperimentConfig
@@ -30,8 +28,8 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int, int]:
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
-    bitnet = LeNet(BitLinear, BitConv2d, num_classes, 3, 32)
-    floatnet = LeNet(nn.Linear, nn.Conv2d, num_classes, 3, 32)
+    bitnet =  bit_mobilenet_v2(num_classes=num_classes, pretrained=False)
+    floatnet = mobilenet_v2(num_classes, pretrained=False)
     num_params_bitnet: int = sum(p.numel() for p in bitnet.parameters() if p.requires_grad)
     num_params_floatnet: int = sum(p.numel() for p in floatnet.parameters() if p.requires_grad)
     assert num_params_bitnet == num_params_floatnet
@@ -41,12 +39,9 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int, int]:
 
     criterion = nn.CrossEntropyLoss()
 
-    train_dataset = datasets.CIFAR10('./cifar_data', train=True, download=True, transform=transform)
-    test_dataset = datasets.CIFAR10('./cifar_data', train=False, download=True, transform=transform)
-    val_size: int = int(ExperimentConfig.VALIDATION_SIZE * len(train_dataset))
-    train_size: int = len(train_dataset) - val_size
-
-    train_dataset, val_dataset = random_split(train_dataset, [train_size, val_size])
+    train_dataset = EuroSAT("./eurosat_data/", split="train", download=True, transform=transform)
+    val_dataset = EuroSAT("./eurosat_data/", split="val", download=True, transform=transform)
+    test_dataset = EuroSAT("./eurosat_data/", split="test", download=True, transform=transform)
 
     set_seed(seed)
     train_loader = DataLoader(

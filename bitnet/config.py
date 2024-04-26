@@ -12,4 +12,5 @@ class ExperimentConfig:
     NUM_RUNS: int = 10
     SEED: int = 53
     VALIDATION_SIZE: float = 0.2
+    TEST_SIZE: float = 0.2
     NUM_PARALLEL_EXP: int = 1

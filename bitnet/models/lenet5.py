@@ -25,6 +25,8 @@ class LeNet(nn.Module):
                 size_first_linlayer: int = 400
             case 32:
                 size_first_linlayer = 576
+            case 64:
+                size_first_linlayer = 3136
             case 96:
                 size_first_linlayer = 7744
             case _:
