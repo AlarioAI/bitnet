@@ -3,8 +3,11 @@ import random
 import numpy as np
 import torch
 
+from bitnet.config import ExperimentConfig
 
-def set_seed(seed_value: int = 53):
+def set_seed(seed_value: int | None):
+    if seed_value is None:
+        seed_value = ExperimentConfig.SEED
     """Sets the seed for reproducibility."""
     torch.manual_seed(seed_value)
     torch.cuda.manual_seed(seed_value)

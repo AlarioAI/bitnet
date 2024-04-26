@@ -1,25 +1,36 @@
+from typing import Callable
+
 import torch.nn as nn
 from torch import Tensor
 
-from bitnet.nn.bitlinear import BitLinear
 from bitnet.nn.bitconv2d import BitConv2d
+from bitnet.nn.bitlinear import BitLinear
 
 
 class LeNet(nn.Module):
     def __init__(
             self,
-            linear_layer: callable,
-            conv_layer: callable,
+            linear_layer: Callable,
+            conv_layer: Callable,
             num_classes: int,
             in_channels: int,
             input_size: int,
         ) -> None:
         super(LeNet, self).__init__()
 
-        assert input_size in (28, 32)
         self.linear_layer = linear_layer
         self.conv_layer = conv_layer
-        size_first_linlayer: int = 400 if input_size == 28 else 576
+        match input_size:
+            case 28:
+                size_first_linlayer: int = 400
+            case 32:
+                size_first_linlayer = 576
+            case 64:
+                size_first_linlayer = 3136
+            case 96:
+                size_first_linlayer = 7744
+            case _:
+                raise ValueError(f"Unsupported input size: {input_size}")
 
         self.layer1 = nn.Sequential(
             self.conv_layer(in_channels, 6, kernel_size=5, stride=1, padding=2, bias=False),

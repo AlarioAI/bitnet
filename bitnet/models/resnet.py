@@ -293,7 +293,7 @@ def _resnet(
     return model
 
 
-def load_pretrained_weights(model, model_name: str, linear_layer, conv_layer, pretrained: bool, **kwargs):
+def load_pretrained_weights(model, model_name: str, pretrained: bool, **kwargs):
     if not pretrained:
         return model
 
@@ -312,27 +312,27 @@ def load_pretrained_weights(model, model_name: str, linear_layer, conv_layer, pr
 
 def resnet18(linear_layer, conv_layer, pretrained: bool, **kwargs):
     model = _resnet(linear_layer, conv_layer, BasicBlock, [2, 2, 2, 2], **kwargs)
-    return load_pretrained_weights(model, 'resnet18', linear_layer, conv_layer, pretrained, **kwargs)
+    return load_pretrained_weights(model, 'resnet18', pretrained, **kwargs)
 
 
 def resnet34(linear_layer, conv_layer, pretrained: bool, **kwargs):
     model = _resnet(linear_layer, conv_layer, BasicBlock, [3, 4, 6, 3], **kwargs)
-    return load_pretrained_weights(model, 'resnet34', linear_layer, conv_layer, pretrained, **kwargs)
+    return load_pretrained_weights(model, 'resnet34', pretrained, **kwargs)
 
 
 def resnet50(linear_layer, conv_layer, pretrained: bool, **kwargs):
     model = _resnet(linear_layer, conv_layer, Bottleneck, [3, 4, 6, 3], **kwargs)
-    return load_pretrained_weights(model, 'resnet50', linear_layer, conv_layer, pretrained, **kwargs)
+    return load_pretrained_weights(model, 'resnet50', pretrained, **kwargs)
 
 
 def resnet101(linear_layer, conv_layer, pretrained: bool, **kwargs):
     model = _resnet(linear_layer, conv_layer, Bottleneck, [3, 4, 23, 3], **kwargs)
-    return load_pretrained_weights(model, 'resnet101', linear_layer, conv_layer, pretrained, **kwargs)
+    return load_pretrained_weights(model, 'resnet101', pretrained, **kwargs)
 
 
 def resnet152(linear_layer, conv_layer, pretrained: bool, **kwargs):
     model = _resnet(linear_layer, conv_layer, Bottleneck, [3, 8, 36, 3], **kwargs)
-    return load_pretrained_weights(model, 'resnet152', linear_layer, conv_layer, pretrained, **kwargs)
+    return load_pretrained_weights(model, 'resnet152', pretrained, **kwargs)
 
 
 def main():
