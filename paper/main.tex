@@ -18,7 +18,7 @@
 
 \usepackage[final]{main}    % Use the final version of the NeurIPS style
 
-\title{Convolutional Neural Networks in 1.58 Bits}
+\title{Computer Vision in 1.58 Bits}
 
 \author{%
   Dario Cazzani \\
@@ -39,15 +39,16 @@
 \maketitle
 
 \begin{abstract}
-The rapid evolution of large language models (LLMs) towards 1-bit architectures has proven effective in reducing their energy and memory footprint. Landmark studies such as BitNet \cite{wang2023bitnet} and "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} have paved the way for significant efficiency improvements without compromising performance. Extending these innovations, this paper explores the application of 1.58-bit quantization to convolutional neural networks (CNNs), specifically examining MobileNet and ResNet architectures. We conduct extensive experiments on well-known datasets including CIFAR-10/100, MNIST, and CelebA, analyzing the impacts of reduced bit-width on these networks. Our results reveal that while the performance of some models slightly decreases, the efficiency gains are substantial. We complement our study with open-source code to foster reproducibility and enable further academic and practical advancements.
+  The rapid evolution of large language models (LLMs) towards 1-bit architectures has proven effective in reducing their energy and memory footprint. Landmark studies such as BitNet \cite{wang2023bitnet} and "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} have paved the way for significant efficiency improvements without compromising performance. Extending these innovations, this paper explores the application of 1.58-bit quantization to convolutional neural networks (CNNs), specifically examining LeNet5 \cite{lecun-gradientbased-learning-applied-1998}, ResNet18, ResNet152 \cite{he2015deep}, and MobileNetv2 \cite{sandler2019mobilenetv2} architectures. We conduct extensive experiments on well-known datasets including CIFAR-10 \cite{cifar10}, CIFAR-100 \cite{cifar100}, MNIST \cite{deng2012mnist}, EuroSAT \cite{helber2019eurosat}, and STL10 \cite{stl10}, analyzing the impacts of reduced bit-width on these networks. Our results reveal that while the performance of some models slightly decreases, the efficiency gains are substantial. We complement our study with open-source code to foster reproducibility and enable further academic and practical advancements.
 \end{abstract}
+
 
 \section{Introduction}
 
-The escalating computational demands of large language models necessitate continuous innovation to optimize their architecture for reduced energy consumption and memory usage without sacrificing performance. Recent advances have demonstrated the potential of 1-bit architectures in achieving these goals, with studies such as BitNet \cite{wang2023bitnet} and "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} providing foundational frameworks that balance scalability and computational efficiency. However, the adaptation of these techniques to convolutional neural networks (CNNs) presents unique challenges, particularly in maintaining performance metrics across diverse tasks and datasets. This research extends the 1.58-bit quantization approach, previously confined to linear models, to prominent CNN architectures such as MobileNet and ResNet. Through rigorous testing on CIFAR-10/100, MNIST, and CelebA datasets, we offer a comprehensive evaluation of how CNNs perform under the constraints of reduced bit-width, providing valuable insights into the potential and limitations of further bit reduction in neural network architectures. This paper not only details our findings but also contributes to the community by releasing our experimental framework as open-source software, ensuring that our results are reproducible and that the methodologies employed can be further explored and enhanced by the research community.
+The escalating computational demands of large language models necessitate continuous innovation to optimize their architecture for reduced energy consumption and memory usage without sacrificing performance. Recent advances have demonstrated the potential of 1-bit architectures in achieving these goals, with studies such as BitNet \cite{wang2023bitnet} and "The Era of 1-bit LLMs: All Large Language Models are in 1.58 Bits" \cite{ma2024era} providing foundational frameworks that balance scalability and computational efficiency. However, the adaptation of these techniques to convolutional neural networks (CNNs) presents unique challenges, particularly in maintaining performance metrics across diverse tasks and datasets. This research extends the 1.58-bit quantization approach, previously confined to linear models, to prominent CNN architectures such as LeNet5 \cite{lecun-gradientbased-learning-applied-1998}, ResNet18, ResNet152 \cite{he2015deep}, and MobileNetv2 \cite{sandler2019mobilenetv2}. Through rigorous testing on CIFAR-10 \cite{cifar10}, CIFAR-100 \cite{cifar100}, MNIST \cite{deng2012mnist}, EuroSAT \cite{helber2019eurosat}, and STL10 \cite{stl10} datasets, we offer a comprehensive evaluation of how CNNs perform under the constraints of reduced bit-width, providing valuable insights into the potential and limitations of further bit reduction in neural network architectures. This paper not only details our findings but also contributes to the community by releasing our experimental framework as open-source software, ensuring that our results are reproducible and that the methodologies employed can be further explored and enhanced by the research community.
 
+The significance of this research extends beyond the technical advancements, as it addresses the pressing need for environmentally sustainable and inclusive AI development. By exploring the potential of 1.58-bit quantization in convolutional neural networks, we aim to contribute to a more energy-efficient and equitable AI ecosystem. Our work has the potential to enable the widespread adoption of AI technologies in resource-constrained settings, such as edge devices or developing regions, and to reduce the environmental impact of large-scale AI deployments, aligning with the United Nations' Sustainable Development Goals (SDGs) \cite{Agenda2023} related to climate action and digital inclusion.
 
-The significance of this research extends beyond the technical advancements, as it addresses the pressing need for environmentally sustainable and inclusive AI development. By exploring the potential of 1.58-bit quantization in convolutional neural networks, we aim to contribute to a more energy-efficient and equitable AI ecosystem. Our work has the potential to enable the widespread adoption of AI technologies in resource-constrained settings, such as edge devices or developing regions, and to reduce the environmental impact of large-scale AI deployments, aligning with the United Nations' Sustainable Development Goals (SDGs) related to climate action and digital inclusion.
 
 \section{Methodology}
 
@@ -94,60 +95,6 @@ In the ensuing tables, we present a comparative analysis of performance metrics 
 
 
 % BEGIN_TABLE
-\begin{table}[h]
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-\Xhline{2\arrayrulewidth}
-\textbf{Architecture} & \textbf{Dataset} & \textbf{Type} & \textbf{Mean Accuracy (\%)} & \textbf{Std Dev (\%)} \\
-\Xhline{2\arrayrulewidth}
-resnet18 & cifar100 & BitNet & 44.95 & 0.66 \\
-resnet18 & cifar100 & FloatNet & \textbf{50.57} & 0.78 \\
-\Xhline{2\arrayrulewidth}
-resnet152 & cifar100 & BitNet & 38.10 & 0.08 \\
-resnet152 & cifar100 & FloatNet & \textbf{49.73} & 0.75 \\
-\Xhline{2\arrayrulewidth}
-lenet5 & cifar100 & BitNet & 26.70 & 0.12 \\
-lenet5 & cifar100 & FloatNet & \textbf{32.15} & 0.34 \\
-\Xhline{2\arrayrulewidth}
-feedforward & mnist & BitNet & 96.31 & 0.03 \\
-feedforward & mnist & FloatNet & \textbf{96.53} & 0.09 \\
-\Xhline{2\arrayrulewidth}
-\end{tabular}
-\caption{Experimental Results Comparing BitNet and FloatNet across various architectures and datasets.}
-\label{tab:results}
-\end{table}
-
-\begin{figure}[h]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-xlabel={Number of Parameters},
-ylabel={Accuracy Discrepancy},
-legend style={at={(0.5,-0.15)},anchor=north,legend columns=-1},
-xmode=log,
-log basis x={10},
-]
-\addplot[only marks, mark=*, color=blue] coordinates {
-(79510,0.22499999999999432)
-};
-\addlegendentry{feedforward}
-\addplot[only marks, mark=*, color=red] coordinates {
-(90798,5.445)
-};
-\addlegendentry{lenet5}
-\addplot[only marks, mark=*, color=green] coordinates {
-(58348708,11.629999999999995)
-};
-\addlegendentry{resnet152}
-\addplot[only marks, mark=*, color=brown] coordinates {
-(11227812,5.619999999999997)
-};
-\addlegendentry{resnet18}
-\end{axis}
-\end{tikzpicture}
-\caption{Correlation between number of parameters and accuracy discrepancy for BitNet and FloatNet.}
-\label{fig:discrepancy_plot}
-\end{figure}
 
 % END_TABLE
 
