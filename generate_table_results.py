@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from bitnet.config import ProjectConfig
+from bitnet.experiments.config import ProjectConfig
 
 def sort_by_architecture(data: dict):
     sorted_keys = sorted(data.keys(), key=lambda x: (x.split("_")[1], x.split("_")[0]))

@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from bitnet.metrics import Metrics
+from bitnet.experiments.metrics import Metrics
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Running on device: {device}")
@@ -57,7 +57,6 @@ def train_model(
             best_model = model
 
     return best_model
-
 
 
 def test_model(model: nn.Module, test_loader: DataLoader) -> tuple[dict[str, float], Metrics]:
