@@ -37,7 +37,7 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int, int]:
     results, metrics_used = test_model(bitnet, test_loader)
     return_value.update(results)
 
-    train_loader, val_loader, test_loader, trainset_size = get_dataloaders(AvailableDatasets.CIFAR100, seed, batch_size)
+    train_loader, val_loader, test_loader, trainset_size = get_dataloaders(AvailableDatasets.STL10, seed, batch_size)
 
     floatnet = train_model(floatnet, train_loader, val_loader, floatnet_optimizer, criterion, num_epochs)
     results, metrics_used = test_model(floatnet, test_loader)
