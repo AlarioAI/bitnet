@@ -104,7 +104,7 @@ def get_dataloaders(
         case AvailableDatasets.MNIST:
             transform = transforms.Compose([
                 transforms.ToTensor(),
-                transforms.Normalize(((0.485,0.456, 0.406)), (0.229, 0.224, 0.225))
+                transforms.Normalize((0.1307,), (0.3081,))
             ])
             train_dataset = datasets.MNIST('./mnist_data', train=True, download=True, transform=transform)
             test_dataset = datasets.MNIST('./mnist_data', train=False, download=True, transform=transform)
