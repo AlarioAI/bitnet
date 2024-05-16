@@ -1,6 +1,4 @@
-import torchvision.models as models
 from torch import nn
-import torch
 
 from bitnet.nn.bitconv2d import BitConv2d
 from bitnet.nn.bitlinear import BitLinear
@@ -44,15 +42,3 @@ def replace_conv2d_layers(model):
 def replace_layers(model):
     replace_linear_layers(model)
     replace_conv2d_layers(model)
-
-
-def main():
-    mobilenet_v2 = models.mobilenet_v2(pretrained=False, num_classes=10)
-    _input = torch.randn(1, 3, 224, 224)
-    replace_layers(mobilenet_v2)
-    mobilenet_v2(_input)
-
-
-if __name__ == "__main__":
-    main()
-
