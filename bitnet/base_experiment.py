@@ -16,7 +16,7 @@ def train_model(
         optimizer: torch.optim.Optimizer,
         criterion: nn.CrossEntropyLoss,
         num_epochs: int,
-        model_name: str) -> nn.Module:
+        model_name: str) -> tuple[nn.Module, float]:
 
     best_model: nn.Module = model
     best_val_loss = float('inf')
@@ -57,11 +57,10 @@ def train_model(
             best_val_loss = val_loss
             best_model = model
 
-    return best_model
+    return best_model, val_loss
 
 
-
-def test_model(model: nn.Module, test_loader: DataLoader, model_name: str) -> dict[str, float]:
+def test_model(model: nn.Module, test_loader: DataLoader, model_name: str) -> float:
     model.eval()
     model = model.to(device)
     correct: int = 0
@@ -73,5 +72,5 @@ def test_model(model: nn.Module, test_loader: DataLoader, model_name: str) -> di
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    metric: float = 100 * correct / total
-    return {model_name: metric}
+    accuracy: float = 100 * correct / total
+    return accuracy
