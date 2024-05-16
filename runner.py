@@ -21,9 +21,19 @@ class ExperimentResult:
     floatnet_val_loss: float
     floatnet_accuracy: float
 
+    def __str__(self):
+        return (
+            f"ExperimentResult:\n"
+            f"  bitnet_val_loss:   {self.bitnet_val_loss:.4f}\n"
+            f"  bitnet_accuracy:   {self.bitnet_accuracy:.4f}\n"
+            f"  floatnet_val_loss: {self.floatnet_val_loss:.4f}\n"
+            f"  floatnet_accuracy: {self.floatnet_accuracy:.4f}"
+        )
+
 
 def run_single_experiment(model_name: str, seed: int | None, hyperparams: dict):
     set_seed(seed)
+
     model = get_callable_from_string(hyperparams["model"])
     floatnet = model(pretrained=False)
     bitnet = model(pretrained=False)
