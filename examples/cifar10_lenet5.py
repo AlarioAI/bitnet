@@ -6,9 +6,8 @@ from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 
-from bitnet.nn.bitlinear import BitLinear
-from bitnet.nn.bitconv2d import BitConv2d
 from bitnet.models.lenet5 import LeNet
+from bitnet.layer_swap import replace_layers
 from bitnet.metrics import Metrics
 from bitnet.seed import set_seed
 from bitnet.config import ExperimentConfig
@@ -30,8 +29,10 @@ def run(seed: int | None) -> tuple[dict[str, float], Metrics, int, int]:
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
-    bitnet = LeNet(BitLinear, BitConv2d, num_classes, 3, 32)
-    floatnet = LeNet(nn.Linear, nn.Conv2d, num_classes, 3, 32)
+    bitnet = LeNet(num_classes, in_channels=3, input_size=32)
+    replace_layers(bitnet)
+    floatnet = LeNet(num_classes, in_channels=3, input_size=32)
+
     num_params_bitnet: int = sum(p.numel() for p in bitnet.parameters() if p.requires_grad)
     num_params_floatnet: int = sum(p.numel() for p in floatnet.parameters() if p.requires_grad)
     assert num_params_bitnet == num_params_floatnet
