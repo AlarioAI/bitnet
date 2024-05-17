@@ -33,6 +33,7 @@ class ExperimentResult:
 
 def run_single_experiment(model_name: str, seed: int | None, hyperparams: dict):
     set_seed(seed)
+
     model = get_callable_from_string(hyperparams["model"])
     floatnet = model(pretrained=False)
     bitnet = model(pretrained=False)
