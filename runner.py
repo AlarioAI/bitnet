@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from bitnet.layer_swap import replace_layers
 from bitnet.seed import set_seed
-from bitnet.base_experiment import train_model, test_model
+from bitnet.model_training import train_model, test_model
 from bitnet.config import get_callable_from_string
 
 from dataloaders import get_loaders
@@ -20,6 +20,15 @@ class ExperimentResult:
     best_floatnet: torch.nn.Module
     floatnet_val_loss: float
     floatnet_accuracy: float
+
+    def __str__(self):
+        return (
+            f"ExperimentResult:\n"
+            f"  bitnet_val_loss:   {self.bitnet_val_loss:.4f}\n"
+            f"  bitnet_accuracy:   {self.bitnet_accuracy:.4f}\n"
+            f"  floatnet_val_loss: {self.floatnet_val_loss:.4f}\n"
+            f"  floatnet_accuracy: {self.floatnet_accuracy:.4f}"
+        )
 
 
 def run_single_experiment(model_name: str, seed: int | None, hyperparams: dict):

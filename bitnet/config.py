@@ -15,7 +15,7 @@ def get_callable_from_string(callable_string: str):
 
 
 class ProjectConfig:
-    EXAMPLES_DIR: str = "examples"
+    EXAMPLES_DIR: str = "experiments"
     PAPER_DIR: str = "paper"
     HYPERPARAMS_CONFIG_PATH: str = "config_hyperparams.yaml"
     RESULTS_FILE: str = os.path.join(PAPER_DIR, "experiment_results.json")

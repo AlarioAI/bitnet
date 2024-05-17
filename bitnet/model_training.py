@@ -3,8 +3,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from bitnet.metrics import Metrics
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Running on device: {device}")
 
