@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from bitnet.experiments.config import ExperimentConfig
+from bitnet.config import ExperimentConfig
 
 def set_seed(seed_value: int | None):
     if seed_value is None:

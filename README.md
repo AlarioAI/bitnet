@@ -45,19 +45,12 @@ print(output.shape)
 
 ### Run one experiment at a time, for example
 1. **Feedforward** `MNIST`
-Train a one-hidden layer 1.58bits neural network on the MNIST dataset
-```sh
-python examples/mnist_feedforward.py
-```
-2. **LeNet5** `MNIST`
-Train the classic LeNet5 with 1.58bits linear and convolutional layers
-```sh
-python examples/mnist_lenet5.py
+WIP
 ```
 
 ### Run all experiments with different seeds and update the `tex` file:
 ```sh
-python run_experiemnts.py
+python run_experiments.py
 python generate_table_results.py
 ```
 
