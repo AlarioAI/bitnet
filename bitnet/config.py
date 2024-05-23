@@ -1,17 +1,17 @@
 
 import importlib
 import os
+import types
 from pathlib import Path
+from typing import Callable
 
 import yaml
 
 
-def get_callable_from_string(callable_string: str):
+def get_callable_from_string(callable_string: str) -> Callable:
     module_name, func_name = callable_string.rsplit('.', 1)
-    module = importlib.import_module(module_name)
+    module: types.ModuleType = importlib.import_module(module_name)
     return getattr(module, func_name)
-
-
 
 
 class ProjectConfig:
