@@ -4,7 +4,7 @@ from bitnet.nn.bitconv2d import BitConv2d
 from bitnet.nn.bitlinear import BitLinear
 
 
-def replace_linear_layers(model):
+def replace_linear_layers(model: nn.Module):
     for name, module in model.named_children():
         if isinstance(module, nn.Linear):
             setattr(
@@ -20,7 +20,7 @@ def replace_linear_layers(model):
             replace_linear_layers(module)
 
 
-def replace_conv2d_layers(model):
+def replace_conv2d_layers(model: nn.Module):
     for name, module in model.named_children():
         if isinstance(module, nn.Conv2d):
             setattr(
@@ -39,6 +39,6 @@ def replace_conv2d_layers(model):
             replace_conv2d_layers(module)
 
 
-def replace_layers(model):
+def replace_layers(model: nn.Module):
     replace_linear_layers(model)
     replace_conv2d_layers(model)

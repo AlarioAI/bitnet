@@ -33,16 +33,16 @@ class ExperimentConfig:
 
 class HyperparameterConfig:
     def __init__(self):
-        self.config_path = Path(ProjectConfig.HYPERPARAMS_CONFIG_PATH)
+        self.config_path: Path = Path(ProjectConfig.HYPERPARAMS_CONFIG_PATH)
         self.config = self.load_config()
 
 
-    def load_config(self):
+    def load_config(self) -> dict[str, dict]:
         with open(self.config_path, 'r') as file:
             return yaml.safe_load(file)
 
 
-    def get_hyperparameters(self, model_name: str):
+    def get_hyperparameters(self, model_name: str) -> dict:
         return self.config.get(model_name, {})
 
 
