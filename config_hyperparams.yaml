@@ -1,5 +1,48 @@
+## RESNET
 resnet18:
   model: "torchvision.models.resnet18"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+resnet50:
+  model: "torchvision.models.resnet50"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+resnet101:
+  model: "torchvision.models.resnet101"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+resnext50_32x4d:
+  model: "torchvision.models.resnext50_32x4d"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+resnext50_32x4d:
+  model: "torchvision.models.resnext50_32x4d"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+wide_resnet50_2:
+  model: "torchvision.models.wide_resnet50_2"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+se_resnet50:
+  model: "bitnet.models.se_resnet.se_resnet50"
   learning_rate: 0.001
   batch_size: 128
   num_epochs: 10
