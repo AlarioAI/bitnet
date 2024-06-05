@@ -35,8 +35,8 @@ def run_single_experiment(model_name: str, seed: int | None, hyperparams: dict):
     set_seed(seed)
 
     model = get_callable_from_string(hyperparams["model"])
-    floatnet = model(pretrained=False)
-    bitnet = model(pretrained=False)
+    floatnet = model(weights=None)
+    bitnet = model(weights=None)
     replace_layers(bitnet)
 
     bitnet_opt = torch.optim.Adam(bitnet.parameters(), lr=hyperparams["learning_rate"])

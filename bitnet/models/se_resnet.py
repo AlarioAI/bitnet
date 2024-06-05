@@ -61,8 +61,8 @@ class Bottleneck(nn.Module):
 
 class SEResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, pretrained: bool=False):
-        if pretrained:
+    def __init__(self, block, layers, num_classes=1000, weights=None):
+        if weights:
             raise NotImplementedError(f"We don't have pretrained weights for {self.__class__.__name__}")
         self.inplanes = 64
         super(SEResNet, self).__init__()

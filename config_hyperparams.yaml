@@ -1,4 +1,4 @@
-## RESNET
+### RESNET
 resnet18:
   model: "torchvision.models.resnet18"
   learning_rate: 0.001
