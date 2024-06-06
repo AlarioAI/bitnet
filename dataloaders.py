@@ -3,7 +3,7 @@ import multiprocessing as mp
 
 from torchvision import datasets, transforms
 
-from bitnet.config import ExperimentConfig
+from bitnet.config import ExperimentConfig, DataParams
 from bitnet.seed import set_seed
 from torch.utils.data import DataLoader
 
@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 def get_loaders(seed: int | None, batch_size: int) -> tuple[DataLoader, ...]:
     set_seed(seed)
     transform = transforms.Compose([
-        transforms.Resize((224, 224)), # Simulate ImageNet input size
+        transforms.Resize(DataParams.input_size), # Simulate ImageNet input size
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])

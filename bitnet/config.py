@@ -20,6 +20,7 @@ class Architectures(Enum):
     convnext = "config/convnext.yaml"
     efficientnet = "config/efficientnet.yaml"
     mobilenet = "config/mobilenet.yaml"
+    vit = "config/vit.yaml"
 
 
 class ProjectConfig:
@@ -35,6 +36,13 @@ class ExperimentConfig:
     VALIDATION_SIZE: float = 0.2
     TEST_SIZE: float = 0.2
     NUM_PARALLEL_EXP: int = 1
+
+
+class DataParams:
+    name: str = "ImageNet-21K-P"
+    input_size: tuple[int, int] = (224, 224)
+    num_channels: int = 3
+    num_classes: int = 1_000
 
 
 class HyperparameterConfig:

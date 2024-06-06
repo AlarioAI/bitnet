@@ -1,0 +1,26 @@
+vit_b_16:
+  model: "torchvision.models.vit_b_16"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+vit_b_32:
+  model: "torchvision.models.vit_b_32"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+vit_l_16:
+  model: "torchvision.models.vit_l_16"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+crossvit:
+  model: "bitnet.models.crossvit.crossvit_base"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
