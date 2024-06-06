@@ -7,7 +7,7 @@ from torch import Tensor
 
 
 class Bottleneck(nn.Module):
-    self.expansion: int = 4
+    expansion: int = 4
 
     def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample: nn.Sequential | None = None):
         super(Bottleneck, self).__init__()
