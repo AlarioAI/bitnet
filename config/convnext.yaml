@@ -8,12 +8,12 @@ convnext_tiny:
 convnext_small:
   model: "torchvision.models.convnext_small"
   learning_rate: 0.001
-  batch_size: 128
+  batch_size: 64
   num_epochs: 10
 
 
 convnext_base:
   model: "torchvision.models.base"
   learning_rate: 0.001
-  batch_size: 128
+  batch_size: 32
   num_epochs: 10
