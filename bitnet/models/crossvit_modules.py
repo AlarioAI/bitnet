@@ -1,26 +1,22 @@
+from typing import Callable
+
 from einops import rearrange
-from torch import einsum, nn
-
-
-class Residual(nn.Module):
-    def __init__(self, fn):
-        super().__init__()
-        self.fn = fn
-    def forward(self, x, **kwargs):
-        return self.fn(x, **kwargs) + x
+from torch import Tensor, einsum, nn
 
 
 class PreNorm(nn.Module):
-    def __init__(self, dim, fn):
+    def __init__(self, dim: int, module: Callable):
         super().__init__()
         self.norm = nn.LayerNorm(dim)
-        self.fn = fn
-    def forward(self, x, **kwargs):
-        return self.fn(self.norm(x), **kwargs)
+        self.module = module
+
+
+    def forward(self, _input: Tensor, **kwargs) -> Tensor:
+        return self.module(self.norm(_input), **kwargs)
 
 
 class FeedForward(nn.Module):
-    def __init__(self, dim, hidden_dim, dropout = 0.):
+    def __init__(self, dim: int, hidden_dim: int, dropout:float):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(dim, hidden_dim),
@@ -29,54 +25,51 @@ class FeedForward(nn.Module):
             nn.Linear(hidden_dim, dim),
             nn.Dropout(dropout)
         )
-    def forward(self, x):
-        return self.net(x)
+
+
+    def forward(self, _input: Tensor) -> Tensor:
+        return self.net(_input)
 
 
 class Attention(nn.Module):
-    def __init__(self, dim, heads = 8, dim_head = 64, dropout = 0.):
+    def __init__(self, dim: int, heads: int, dim_head: int, dropout: float):
         super().__init__()
         inner_dim = dim_head *  heads
         project_out = not (heads == 1 and dim_head == dim)
-
         self.heads = heads
         self.scale = dim_head ** -0.5
-
-        self.to_qkv = nn.Linear(dim, inner_dim * 3, bias = False)
-
+        self.to_query_key_value = nn.Linear(dim, inner_dim * 3, bias = False)
         self.to_out = nn.Sequential(
             nn.Linear(inner_dim, dim),
             nn.Dropout(dropout)
         ) if project_out else nn.Identity()
 
 
-    def forward(self, x):
-        _, _, _, h = *x.shape, self.heads
-        qkv = self.to_qkv(x).chunk(3, dim = -1)
-        q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h = h), qkv)
+    def forward(self, _input: Tensor) -> Tensor:
+        _, _, _, num_heads = *_input.shape, self.heads
+        qkv: Tensor = self.to_query_key_value(_input).chunk(3, dim = -1)
+        query, key, value = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h = num_heads), qkv)
 
-        dots = einsum('b h i d, b h j d -> b h i j', q, k) * self.scale
-
+        dots: Tensor = einsum('b h i d, b h j d -> b h i j', query, key) * self.scale
         attn = dots.softmax(dim=-1)
-
-        out = einsum('b h i j, b h j d -> b h i d', attn, v)
+        out = einsum('b h i j, b h j d -> b h i d', attn, value)
         out = rearrange(out, 'b h n d -> b n (h d)')
-        out =  self.to_out(out)
+        out: Tensor =  self.to_out(out)
         return out
 
 
 class CrossAttention(nn.Module):
-    def __init__(self, dim, heads = 8, dim_head = 64, dropout = 0.):
+    def __init__(self, dim: int, heads:int, dim_head: int, dropout:float):
         super().__init__()
-        inner_dim = dim_head *  heads
+        inner_dim = dim_head * heads
         project_out = not (heads == 1 and dim_head == dim)
 
         self.heads = heads
-        self.scale = dim_head ** -0.5
+        self.scale: float = float(dim_head) ** -0.5
 
-        self.to_k = nn.Linear(dim, inner_dim , bias=False)
-        self.to_v = nn.Linear(dim, inner_dim , bias = False)
-        self.to_q = nn.Linear(dim, inner_dim, bias = False)
+        self.to_key = nn.Linear(dim, inner_dim , bias=False)
+        self.to_value = nn.Linear(dim, inner_dim , bias = False)
+        self.to_query = nn.Linear(dim, inner_dim, bias = False)
 
         self.to_out = nn.Sequential(
             nn.Linear(inner_dim, dim),
@@ -84,25 +77,23 @@ class CrossAttention(nn.Module):
         ) if project_out else nn.Identity()
 
 
-    def forward(self, x_qkv):
-        _, _, _, h = *x_qkv.shape, self.heads
+    def forward(self, x_qkv: Tensor) -> Tensor:
+        _, _, _, num_heads = *x_qkv.shape, self.heads
 
-        k = self.to_k(x_qkv)
-        k = rearrange(k, 'b n (h d) -> b h n d', h = h)
+        key: Tensor = self.to_key(x_qkv)
+        key = rearrange(key, 'b n (h d) -> b h n d', h = num_heads)
 
-        v = self.to_v(x_qkv)
-        v = rearrange(v, 'b n (h d) -> b h n d', h = h)
+        value: Tensor = self.to_value(x_qkv)
+        value = rearrange(value, 'b n (h d) -> b h n d', h = num_heads)
 
-        q = self.to_q(x_qkv[:, 0].unsqueeze(1))
-        q = rearrange(q, 'b n (h d) -> b h n d', h = h)
+        query: Tensor = self.to_query(x_qkv[:, 0].unsqueeze(1))
+        query = rearrange(query, 'b n (h d) -> b h n d', h = num_heads)
 
-
-
-        dots = einsum('b h i d, b h j d -> b h i j', q, k) * self.scale
+        dots = einsum('b h i d, b h j d -> b h i j', query, key) * self.scale
 
         attn = dots.softmax(dim=-1)
 
-        out = einsum('b h i j, b h j d -> b h i d', attn, v)
+        out = einsum('b h i j, b h j d -> b h i d', attn, value)
         out = rearrange(out, 'b h n d -> b n (h d)')
-        out =  self.to_out(out)
+        out: Tensor =  self.to_out(out)
         return out
