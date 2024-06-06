@@ -15,7 +15,7 @@ vit_b_32:
 vit_l_16:
   model: "torchvision.models.vit_l_16"
   learning_rate: 0.001
-  batch_size: 128
+  batch_size: 64
   num_epochs: 10
 
 
