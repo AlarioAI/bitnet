@@ -19,6 +19,7 @@ class Architectures(Enum):
     resnet = "config/resnet.yaml"
     convnext = "config/convnext.yaml"
     efficientnet = "config/efficientnet.yaml"
+    mobilenet = "config/mobilenet.yaml"
 
 
 class ProjectConfig:
