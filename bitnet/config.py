@@ -18,6 +18,7 @@ def get_callable_from_string(callable_string: str) -> Callable:
 class Architectures(Enum):
     resnet = "config/resnet.yaml"
     convnext = "config/convnext.yaml"
+    efficientnet = "config/efficientnet.yaml"
 
 
 class ProjectConfig:

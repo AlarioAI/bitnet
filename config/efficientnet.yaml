@@ -1,0 +1,26 @@
+efficientnet_b0:
+  model: "torchvision.models.efficientnet_b0"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+efficientnet_b1:
+  model: "torchvision.models.efficientnet_b1"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+efficientnet_b2:
+  model: "torchvision.models.efficientnet_b2"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+efficientnet_b3:
+  model: "torchvision.models.efficientnet_b3"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
