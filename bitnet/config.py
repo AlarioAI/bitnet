@@ -2,6 +2,7 @@
 import importlib
 import os
 import types
+from enum import Enum
 from pathlib import Path
 from typing import Callable
 
@@ -14,10 +15,16 @@ def get_callable_from_string(callable_string: str) -> Callable:
     return getattr(module, func_name)
 
 
+class Architectures(Enum):
+    resnet = "config/resnet.yaml"
+    convnext = "config/convnext.yaml"
+    efficientnet = "config/efficientnet.yaml"
+    mobilenet = "config/mobilenet.yaml"
+    vit = "config/vit.yaml"
+
+
 class ProjectConfig:
-    EXAMPLES_DIR: str = "experiments"
     PAPER_DIR: str = "paper"
-    HYPERPARAMS_CONFIG_PATH: str = "config_hyperparams.yaml"
     RESULTS_FILE: str = os.path.join(PAPER_DIR, "experiment_results.json")
     PAPER_TEX_PATH: str = os.path.join(f"{PAPER_DIR}", "main.tex")
     TABLE_TEX_PATH: str = os.path.join(f"{PAPER_DIR}", "table.tex")
@@ -31,9 +38,16 @@ class ExperimentConfig:
     NUM_PARALLEL_EXP: int = 1
 
 
+class DataParams:
+    name: str = "ImageNet-21K-P"
+    input_size: tuple[int, int] = (224, 224)
+    num_channels: int = 3
+    num_classes: int = 1_000
+
+
 class HyperparameterConfig:
-    def __init__(self):
-        self.config_path: Path = Path(ProjectConfig.HYPERPARAMS_CONFIG_PATH)
+    def __init__(self, yaml_config: str):
+        self.config_path: Path = Path(yaml_config)
         self.config = self.load_config()
 
 

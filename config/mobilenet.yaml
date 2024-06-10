@@ -1,0 +1,19 @@
+mobilenet_v2:
+  model: "torchvision.models.mobilenet_v2"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+mobilenet_v3_small:
+  model: "torchvision.models.mobilenet_v3_small"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10
+
+
+mobilenet_v3_large:
+  model: "torchvision.models.mobilenet_v3_large"
+  learning_rate: 0.001
+  batch_size: 128
+  num_epochs: 10

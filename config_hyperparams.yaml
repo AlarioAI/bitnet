@@ -1,5 +1,0 @@
-resnet18:
-  model: "torchvision.models.resnet18"
-  learning_rate: 0.001
-  batch_size: 128
-  num_epochs: 10

@@ -5,7 +5,7 @@ import torch.nn as nn
 from bitnet.layer_swap import replace_layers
 from bitnet.seed import set_seed
 from bitnet.model_training import train_model, test_model
-from bitnet.config import get_callable_from_string
+from bitnet.config import get_callable_from_string, DataParams
 
 from dataloaders import get_loaders
 
@@ -35,8 +35,8 @@ def run_single_experiment(model_name: str, seed: int | None, hyperparams: dict):
     set_seed(seed)
 
     model = get_callable_from_string(hyperparams["model"])
-    floatnet = model(pretrained=False)
-    bitnet = model(pretrained=False)
+    floatnet = model(weights=None, num_classes = DataParams.num_classes)
+    bitnet = model(weights=None, num_classes = DataParams.num_classes)
     replace_layers(bitnet)
 
     bitnet_opt = torch.optim.Adam(bitnet.parameters(), lr=hyperparams["learning_rate"])
